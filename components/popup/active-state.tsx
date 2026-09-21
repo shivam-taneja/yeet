@@ -27,7 +27,10 @@ export function ActiveState({
 }: ActiveStateProps) {
   const { settings } = useSettings();
   const [now, setNow] = useState(Date.now());
-  const [linkedAccounts, setLinkedAccounts] = useState<number>(0);
+  const [authStatus, setAuthStatus] = useState<{
+    x: boolean;
+    threads: boolean;
+  } | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 10000);
@@ -36,28 +39,39 @@ export function ActiveState({
 
   useEffect(() => {
     const checkLinkedAccounts = async () => {
-      let count = 0;
       try {
         if (browser.cookies) {
-          const xCookie = await browser.cookies.get({
-            url: "https://x.com",
-            name: "auth_token",
-          });
-          if (xCookie) count++;
+          const xCookies = await browser.cookies.getAll({ name: "auth_token" });
+          const xLinked = xCookies.some((c) => c.domain.includes("x.com"));
 
-          const threadsCookie = await browser.cookies.get({
-            url: "https://www.threads.net",
+          const threadsCookies = await browser.cookies.getAll({
             name: "sessionid",
           });
-          if (threadsCookie) count++;
+          const threadsLinked = threadsCookies.some(
+            (c) =>
+              c.domain.includes("threads.com") ||
+              c.domain.includes("instagram.com"),
+          );
+
+          setAuthStatus({ x: xLinked, threads: threadsLinked });
         }
       } catch (e) {
         console.error("Failed to check cookies:", e);
       }
-      setLinkedAccounts(count);
     };
     checkLinkedAccounts();
   }, []);
+
+  const linkedAccounts = authStatus
+    ? (authStatus.x ? 1 : 0) + (authStatus.threads ? 1 : 0)
+    : 0;
+
+  const targetPlatform = sourcePlatform === "X" ? "Threads" : "X";
+  const isTargetLoggedIn = authStatus
+    ? sourcePlatform === "X"
+      ? authStatus.threads
+      : authStatus.x
+    : true;
 
   return (
     <>
@@ -75,18 +89,41 @@ export function ActiveState({
             <span className="h-0.5 w-5 bg-butter" />
             <ArrowRight className="size-5" />
           </div>
-          <PlatformBadge name={sourcePlatform === "X" ? "Threads" : "X"} />
+          <PlatformBadge name={targetPlatform} />
         </div>
         <p className="mt-3 text-center text-sm font-semibold">
           {active
-            ? `Your next post will fly across to ${
-                sourcePlatform === "X" ? "Threads" : "X"
-              }.`
+            ? `Your next post will fly across to ${targetPlatform}.`
             : "Nothing moves while Yeet is paused."}
         </p>
       </div>
 
-      {settings.lastYeet ? (
+      {!isTargetLoggedIn ? (
+        <div className="my-5 flex items-start gap-3 rounded-2xl border-2 border-ink border-dashed bg-coral/10 p-4 text-ink">
+          <AlertCircle className="size-5 shrink-0 text-coral" />
+          <div className="min-w-0 w-full">
+            <p className="text-sm font-bold">Authentication Required</p>
+            <p className="mt-1 text-xs font-semibold text-ink/70">
+              Please log in to {targetPlatform} before you can yeet.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3 w-full rounded-xl border-2 border-ink bg-white font-bold transition-transform hover:-translate-y-0.5 shadow-[2px_2px_0_var(--color-ink)] hover:bg-ink/5"
+              onClick={() => {
+                browser.tabs.create({
+                  url:
+                    targetPlatform === "X"
+                      ? "https://x.com"
+                      : "https://threads.com",
+                });
+              }}
+            >
+              Log in to {targetPlatform}
+            </Button>
+          </div>
+        </div>
+      ) : settings.lastYeet ? (
         <div className="my-5 flex items-start gap-3 rounded-2xl border-2 border-ink bg-background p-4">
           <span className="grid size-9 shrink-0 place-items-center rounded-full bg-mint border-2 border-ink shadow-[2px_2px_0_var(--color-ink)]">
             <Check className="size-5 text-ink" />
@@ -115,7 +152,12 @@ export function ActiveState({
 
       <Button
         onClick={onToggle}
-        className="h-12 w-full rounded-full border-2 border-ink bg-coral text-base font-bold text-cream shadow-[4px_4px_0_var(--color-ink)] hover:bg-coral/90"
+        disabled={!isTargetLoggedIn}
+        className={`h-12 w-full rounded-full border-2 border-ink bg-coral text-base font-bold text-cream shadow-[4px_4px_0_var(--color-ink)] transition-transform ${
+          !isTargetLoggedIn
+            ? "opacity-50 cursor-not-allowed translate-y-1 shadow-[0px_0px_0_var(--color-ink)]"
+            : "hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--color-ink)] active:translate-y-1 active:shadow-[0px_0px_0_var(--color-ink)]"
+        }`}
       >
         {active ? <Pause className="mr-2" /> : <Play className="mr-2" />}
         {active ? "Pause Yeet" : "Start Yeeting"}

@@ -33,7 +33,7 @@ export function QuickPopup({
       .query({ active: true, currentWindow: true })
       .then((tabs) => {
         const url = tabs[0]?.url || "";
-        if (url.includes("x.com") || url.includes("twitter.com")) {
+        if (url.includes("x.com")) {
           setSourcePlatform("X");
         } else if (url.includes("threads.com")) {
           setSourcePlatform("Threads");
