@@ -95,7 +95,13 @@ Contributions are welcome! If you'd like to help improve Yeet, please follow the
 6. Push to the branch (`git push origin feature-name`).
 7. Open a Pull Request.
 
-When updating logic related to X or Threads DOM elements, please update the central source of truth in `lib/constants.ts` rather than hardcoding selectors in the content scripts.
+When updating logic related to X or Threads DOM elements, **do not** hardcode them in the content scripts.
+Instead, Yeet uses an **Over-The-Air (OTA) update system** for UI selectors. If a platform changes its UI (e.g., modifying a button's class name):
+
+1. Update `public/selectors.json` with the new DOM selector.
+2. Update the fallback values in `lib/constants.ts`.
+3. Push to the `main` branch.
+   The extension automatically fetches the latest JSON payload from the raw GitHub URL in the background, fixing broken selectors for all users instantly without requiring a Web Store update!
 
 ## License
 

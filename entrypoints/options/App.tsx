@@ -136,6 +136,9 @@ export default function App() {
           {settings.lastSavedAt && (
             <p className="text-ink/60">Updated {getRelativeTime()}.</p>
           )}
+          <p className="mt-2 font-bold">
+            v{browser.runtime.getManifest().version}
+          </p>
         </div>
       </div>
     </div>
