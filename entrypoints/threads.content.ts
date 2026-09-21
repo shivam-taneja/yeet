@@ -1,26 +1,19 @@
 import { browser } from "wxt/browser";
-import type { AppSettings } from "@/types/settings";
+import { PLATFORM_SELECTORS } from "@/lib/constants";
+import { extractTextFromLexicalEditor } from "@/lib/dom-utils";
 
 export default defineContentScript({
   matches: ["*://*.threads.com/*", "*://*.threads.net/*"],
   main() {
     console.log("[Yeet] Threads Content Script woke up. Ready to auto-yeet.");
 
-    function extractTextFromLexicalEditor(containerSelector: string) {
-      const container = document.querySelector(
-        containerSelector,
-      ) as HTMLElement;
-      if (!container) return "";
-
-      // Lexical editor uses innerText quite well for newlines
-      return container.innerText.trim();
-    }
-
     async function doYeetToX() {
       const storage = await browser.storage.local.get(["isActive"]);
       if (storage.isActive === false) return;
 
-      const text = extractTextFromLexicalEditor('[data-lexical-editor="true"]');
+      const text = extractTextFromLexicalEditor(
+        PLATFORM_SELECTORS.threads.composer,
+      );
       if (!text) {
         console.log("[Yeet] No text found to cross-post.");
         return;
@@ -49,8 +42,11 @@ export default defineContentScript({
     }
 
     function handleThreadsPostClick(e: Event) {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("yeet_auto_post")) return;
+
       const target = e.target as HTMLElement;
-      const postBtn = target.closest('div[role="button"]');
+      const postBtn = target.closest(PLATFORM_SELECTORS.threads.postButton);
 
       if (postBtn && postBtn.textContent?.toLowerCase().trim() === "post") {
         console.log("[Yeet] Intercepted Threads Post button click.");
@@ -59,11 +55,19 @@ export default defineContentScript({
     }
 
     function handleThreadsPostKeydown(e: KeyboardEvent) {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("yeet_auto_post")) return;
+
       if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
         const target = e.target as HTMLElement;
+        const selectorMatch = PLATFORM_SELECTORS.threads.composer
+          .replace(/[[\]"]/g, "")
+          .split("=");
+
         const isComposer =
-          target.closest('[data-lexical-editor="true"]') != null ||
-          target.getAttribute("data-lexical-editor") === "true";
+          target.closest(PLATFORM_SELECTORS.threads.composer) != null ||
+          target.getAttribute(selectorMatch[0]!) === selectorMatch[1];
+
         if (isComposer) {
           console.log("[Yeet] Intercepted Threads Post via Cmd+Enter.");
           doYeetToX();
@@ -79,7 +83,7 @@ export default defineContentScript({
 
       const observer = new MutationObserver((mutations, obs) => {
         const buttons = Array.from(
-          document.querySelectorAll('div[role="button"]'),
+          document.querySelectorAll(PLATFORM_SELECTORS.threads.postButton),
         );
         const postButton = buttons.find((btn) => {
           return btn.textContent?.toLowerCase().trim() === "post";

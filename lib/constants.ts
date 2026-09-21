@@ -1,0 +1,12 @@
+export const PLATFORM_SELECTORS = {
+  x: {
+    composer: '[data-testid="tweetTextarea_0"]',
+    postButtons:
+      '[data-testid="tweetButtonInline"], [data-testid="tweetButton"]',
+    intentPostButton: '[data-testid="tweetButton"]',
+  },
+  threads: {
+    composer: '[data-lexical-editor="true"]',
+    postButton: 'div[role="button"]',
+  },
+} as const;

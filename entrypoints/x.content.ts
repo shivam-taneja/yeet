@@ -1,31 +1,17 @@
 import { browser } from "wxt/browser";
-import type { AppSettings } from "@/types/settings";
+import { PLATFORM_SELECTORS } from "@/lib/constants";
+import { extractTextFromDraftEditor } from "@/lib/dom-utils";
 
 export default defineContentScript({
   matches: ["*://*.x.com/*"],
   main() {
     console.log("[Yeet] X Content Script woke up. Ready to yeet.");
 
-    // Helper to get text from Draft.js editor
-    function extractTextFromDraftEditor(containerSelector: string) {
-      const container = document.querySelector(containerSelector);
-      if (!container) return "";
-
-      const textBlocks = container.querySelectorAll('[data-text="true"]');
-      let text = "";
-      textBlocks.forEach((block) => {
-        text += block.textContent + "\n";
-      });
-      return text.trim();
-    }
-
     async function doYeet() {
       const storage = await browser.storage.local.get(["isActive"]);
       if (storage.isActive === false) return;
 
-      const text = extractTextFromDraftEditor(
-        '[data-testid="tweetTextarea_0"]',
-      );
+      const text = extractTextFromDraftEditor(PLATFORM_SELECTORS.x.composer);
 
       if (!text) {
         console.log("[Yeet] No text found to cross-post.");
@@ -55,10 +41,11 @@ export default defineContentScript({
     }
 
     function handleXPostClick(e: Event) {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("yeet_auto_post")) return;
+
       const target = e.target as HTMLElement;
-      const postBtn = target.closest(
-        '[data-testid="tweetButtonInline"], [data-testid="tweetButton"]',
-      );
+      const postBtn = target.closest(PLATFORM_SELECTORS.x.postButtons);
       if (postBtn) {
         console.log("[Yeet] Intercepted X Post button click.");
         doYeet();
@@ -66,11 +53,19 @@ export default defineContentScript({
     }
 
     function handleXPostKeydown(e: KeyboardEvent) {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("yeet_auto_post")) return;
+
       if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
         const target = e.target as HTMLElement;
+        const selectorMatch = PLATFORM_SELECTORS.x.composer
+          .replace(/[[\]"]/g, "")
+          .split("=");
+
         const isComposer =
-          target.closest('[data-testid="tweetTextarea_0"]') != null ||
-          target.getAttribute("data-testid") === "tweetTextarea_0";
+          target.closest(PLATFORM_SELECTORS.x.composer) != null ||
+          target.getAttribute(selectorMatch[0]!) === selectorMatch[1];
+
         if (isComposer) {
           console.log("[Yeet] Intercepted X Post via Cmd+Enter.");
           doYeet();
@@ -86,7 +81,7 @@ export default defineContentScript({
 
       const observer = new MutationObserver((mutations, obs) => {
         const postButton = document.querySelector(
-          '[data-testid="tweetButton"]',
+          PLATFORM_SELECTORS.x.intentPostButton,
         ) as HTMLButtonElement;
 
         if (
