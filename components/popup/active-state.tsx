@@ -1,7 +1,7 @@
 import { ArrowRight, Check, Clock3, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PlatformBadge } from "@/components/product-preview/platform-badge";
-import { StatusPill } from "@/components/product-preview/status-pill";
+import { PlatformBadge } from "@/components/shared/platform-badge";
+import { StatusPill } from "@/components/shared/status-pill";
 
 export interface ActiveStateProps {
   active: boolean;

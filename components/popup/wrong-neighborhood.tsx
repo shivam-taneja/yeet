@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PlatformBadge } from "@/components/product-preview/platform-badge";
+import { PlatformBadge } from "@/components/shared/platform-badge";
 import { browser } from "wxt/browser";
 
 export function WrongNeighborhood() {

@@ -1,4 +1,4 @@
-import { QuickPopup } from "@/components/product-preview/quick-popup";
+import { QuickPopup } from "@/components/popup/quick-popup";
 
 function App() {
   return (

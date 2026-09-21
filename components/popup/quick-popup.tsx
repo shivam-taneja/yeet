@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ActiveState } from "@/components/product-preview/active-state";
-import { WrongNeighborhood } from "@/components/product-preview/wrong-neighborhood";
+import { ActiveState } from "@/components/popup/active-state";
+import { WrongNeighborhood } from "@/components/popup/wrong-neighborhood";
 
 import logoUrl from "@/assets/logo.png";
 import { browser } from "wxt/browser";

@@ -1,27 +1,27 @@
 import { useState, useEffect } from "react";
+import { formatDistanceToNow } from "date-fns";
 import { browser } from "wxt/browser";
+import { useSettings } from "@/hooks/use-settings";
 import logoUrl from "@/assets/logo.png";
 
 export default function App() {
-  const [copyImages, setCopyImages] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
+  const { settings, updateSettings, isLoading } = useSettings();
+  const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
-    // Load setting from extension storage
-    browser.storage.local.get("copyImages").then((result) => {
-      if (result.copyImages !== undefined) {
-        setCopyImages(result.copyImages as boolean);
-      } else {
-        setCopyImages(true);
-      }
-      setIsLoading(false);
-    });
+    const interval = setInterval(() => setNow(Date.now()), 5000);
+    return () => clearInterval(interval);
   }, []);
 
-  const handleToggle = async () => {
-    const newVal = !copyImages;
-    setCopyImages(newVal);
-    await browser.storage.local.set({ copyImages: newVal });
+  const handleToggle = () => {
+    updateSettings({ copyImages: !settings.copyImages });
+  };
+
+  const getRelativeTime = () => {
+    if (!settings.lastSavedAt) return null;
+    const diff = now - settings.lastSavedAt;
+    if (diff < 10000) return "just now";
+    return formatDistanceToNow(settings.lastSavedAt, { addSuffix: true });
   };
 
   if (isLoading) return null;
@@ -62,15 +62,15 @@ export default function App() {
             <button
               type="button"
               role="switch"
-              aria-checked={copyImages}
+              aria-checked={settings.copyImages}
               onClick={handleToggle}
               className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 ${
-                copyImages ? "bg-mint" : "bg-ink/10"
+                settings.copyImages ? "bg-mint" : "bg-ink/10"
               }`}
             >
               <span
                 className={`pointer-events-none block h-5 w-5 rounded-full bg-cream border-2 border-ink shadow-[2px_2px_0_var(--color-ink)] transition-transform ${
-                  copyImages ? "translate-x-2" : "-translate-x-2"
+                  settings.copyImages ? "translate-x-2" : "-translate-x-2"
                 }`}
               />
             </button>
@@ -119,9 +119,14 @@ export default function App() {
           </div>
         </div>
 
-        <p className="text-center mt-10 text-xs font-semibold text-ink/40">
-          Changes are saved automatically. You can close this tab at any time.
-        </p>
+        <div className="text-center mt-10 text-xs font-semibold text-ink/40 flex flex-col items-center gap-1">
+          <p>
+            Changes are saved automatically. You can close this tab at any time.
+          </p>
+          {settings.lastSavedAt && (
+            <p className="text-ink/60">Updated {getRelativeTime()}.</p>
+          )}
+        </div>
       </div>
     </div>
   );
