@@ -78,7 +78,42 @@ export default defineContentScript({
       }
     }
 
+    async function handleXAutoPost() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (!urlParams.get("yeet_auto_post")) return;
+
+      console.log("[Yeet] Auto-posting on X intent page...");
+
+      const observer = new MutationObserver((mutations, obs) => {
+        const postButton = document.querySelector(
+          '[data-testid="tweetButton"]',
+        ) as HTMLButtonElement;
+
+        if (
+          postButton &&
+          !postButton.getAttribute("aria-disabled") &&
+          !postButton.disabled
+        ) {
+          console.log("[Yeet] Found X Post button, clicking it.");
+          obs.disconnect();
+
+          postButton.click();
+
+          setTimeout(() => {
+            console.log("[Yeet] Closing tab.");
+            browser.runtime.sendMessage({ action: "closeTab" });
+          }, 3000);
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+    }
+
     document.addEventListener("click", handleXPostClick, true); // Use capture phase
     document.addEventListener("keydown", handleXPostKeydown, true); // Use capture phase
+    handleXAutoPost();
   },
 });
