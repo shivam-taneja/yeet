@@ -1,11 +1,38 @@
+import { browser } from "wxt/browser";
+
 export default defineBackground(() => {
+  console.log("[Yeet] Background service worker registered.");
+
+  const SELECTORS_URL =
+    "https://raw.githubusercontent.com/shivam-taneja/yeet/main/public/selectors.json";
+
+  async function fetchLatestSelectors() {
+    try {
+      const res = await fetch(SELECTORS_URL);
+      if (res.ok) {
+        const data = await res.json();
+        await browser.storage.local.set({ selectors: data });
+        console.log("[Yeet] OTA selectors updated successfully.");
+      }
+    } catch (error) {
+      console.error("[Yeet] Failed to fetch OTA selectors:", error);
+    }
+  }
+
+  // Fetch on install or startup
+  browser.runtime.onInstalled.addListener(fetchLatestSelectors);
+  browser.runtime.onStartup.addListener(fetchLatestSelectors);
+
+  // Listen for messages from content scripts
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === "openBackgroundTab") {
+    if (message.action === "openBackgroundTab" && message.url) {
+      console.log("[Yeet] Opening background tab:", message.url);
       browser.tabs.create({ url: message.url, active: false });
     }
 
     if (message.action === "closeTab") {
-      if (sender.tab && sender.tab.id) {
+      if (sender.tab?.id) {
+        console.log("[Yeet] Closing tab:", sender.tab.id);
         browser.tabs.remove(sender.tab.id);
       }
     }

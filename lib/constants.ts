@@ -1,4 +1,4 @@
-export const PLATFORM_SELECTORS = {
+export const FALLBACK_SELECTORS = {
   x: {
     composer: '[data-testid="tweetTextarea_0"]',
     postButtons:

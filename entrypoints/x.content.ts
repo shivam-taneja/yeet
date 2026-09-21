@@ -1,5 +1,5 @@
 import { browser } from "wxt/browser";
-import { PLATFORM_SELECTORS } from "@/lib/constants";
+import { FALLBACK_SELECTORS } from "@/lib/constants";
 import { extractTextFromDraftEditor } from "@/lib/dom-utils";
 
 export default defineContentScript({
@@ -7,11 +7,18 @@ export default defineContentScript({
   main() {
     console.log("[Yeet] X Content Script woke up. Ready to yeet.");
 
+    let SELECTORS = FALLBACK_SELECTORS;
+    browser.storage.local.get(["selectors"]).then((res) => {
+      if (res.selectors) {
+        SELECTORS = res.selectors as typeof FALLBACK_SELECTORS;
+      }
+    });
+
     async function doYeet() {
       const storage = await browser.storage.local.get(["isActive"]);
       if (storage.isActive === false) return;
 
-      const text = extractTextFromDraftEditor(PLATFORM_SELECTORS.x.composer);
+      const text = extractTextFromDraftEditor(SELECTORS.x.composer);
 
       if (!text) {
         console.log("[Yeet] No text found to cross-post.");
@@ -45,7 +52,7 @@ export default defineContentScript({
       if (urlParams.get("yeet_auto_post")) return;
 
       const target = e.target as HTMLElement;
-      const postBtn = target.closest(PLATFORM_SELECTORS.x.postButtons);
+      const postBtn = target.closest(SELECTORS.x.postButtons);
       if (postBtn) {
         console.log("[Yeet] Intercepted X Post button click.");
         doYeet();
@@ -58,12 +65,12 @@ export default defineContentScript({
 
       if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
         const target = e.target as HTMLElement;
-        const selectorMatch = PLATFORM_SELECTORS.x.composer
+        const selectorMatch = SELECTORS.x.composer
           .replace(/[[\]"]/g, "")
           .split("=");
 
         const isComposer =
-          target.closest(PLATFORM_SELECTORS.x.composer) != null ||
+          target.closest(SELECTORS.x.composer) != null ||
           target.getAttribute(selectorMatch[0]!) === selectorMatch[1];
 
         if (isComposer) {
@@ -81,7 +88,7 @@ export default defineContentScript({
 
       const observer = new MutationObserver((mutations, obs) => {
         const postButton = document.querySelector(
-          PLATFORM_SELECTORS.x.intentPostButton,
+          SELECTORS.x.intentPostButton,
         ) as HTMLButtonElement;
 
         if (

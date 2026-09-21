@@ -1,5 +1,5 @@
 import { browser } from "wxt/browser";
-import { PLATFORM_SELECTORS } from "@/lib/constants";
+import { FALLBACK_SELECTORS } from "@/lib/constants";
 import { extractTextFromLexicalEditor } from "@/lib/dom-utils";
 
 export default defineContentScript({
@@ -7,13 +7,18 @@ export default defineContentScript({
   main() {
     console.log("[Yeet] Threads Content Script woke up. Ready to auto-yeet.");
 
+    let SELECTORS = FALLBACK_SELECTORS;
+    browser.storage.local.get(["selectors"]).then((res) => {
+      if (res.selectors) {
+        SELECTORS = res.selectors as typeof FALLBACK_SELECTORS;
+      }
+    });
+
     async function doYeetToX() {
       const storage = await browser.storage.local.get(["isActive"]);
       if (storage.isActive === false) return;
 
-      const text = extractTextFromLexicalEditor(
-        PLATFORM_SELECTORS.threads.composer,
-      );
+      const text = extractTextFromLexicalEditor(SELECTORS.threads.composer);
       if (!text) {
         console.log("[Yeet] No text found to cross-post.");
         return;
@@ -46,7 +51,7 @@ export default defineContentScript({
       if (urlParams.get("yeet_auto_post")) return;
 
       const target = e.target as HTMLElement;
-      const postBtn = target.closest(PLATFORM_SELECTORS.threads.postButton);
+      const postBtn = target.closest(SELECTORS.threads.postButton);
 
       if (postBtn && postBtn.textContent?.toLowerCase().trim() === "post") {
         console.log("[Yeet] Intercepted Threads Post button click.");
@@ -60,12 +65,12 @@ export default defineContentScript({
 
       if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
         const target = e.target as HTMLElement;
-        const selectorMatch = PLATFORM_SELECTORS.threads.composer
+        const selectorMatch = SELECTORS.threads.composer
           .replace(/[[\]"]/g, "")
           .split("=");
 
         const isComposer =
-          target.closest(PLATFORM_SELECTORS.threads.composer) != null ||
+          target.closest(SELECTORS.threads.composer) != null ||
           target.getAttribute(selectorMatch[0]!) === selectorMatch[1];
 
         if (isComposer) {
@@ -83,7 +88,7 @@ export default defineContentScript({
 
       const observer = new MutationObserver((mutations, obs) => {
         const buttons = Array.from(
-          document.querySelectorAll(PLATFORM_SELECTORS.threads.postButton),
+          document.querySelectorAll(SELECTORS.threads.postButton),
         );
         const postButton = buttons.find((btn) => {
           return btn.textContent?.toLowerCase().trim() === "post";
