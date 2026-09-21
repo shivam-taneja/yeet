@@ -5,6 +5,10 @@ Yeet is a powerful browser extension that enables seamless, bidirectional cross-
 Website: [yeet.shivamtaneja.com](https://yeet.shivamtaneja.com/)
 Website Source Code: [shivam-taneja/yeet-web](https://github.com/shivam-taneja/yeet-web)
 
+## Demo
+
+https://github.com/user-attachments/assets/1b7b4be9-996c-411b-a182-0f14d98a52e6
+
 ## Features
 
 - Cross-post from X to Threads automatically.
