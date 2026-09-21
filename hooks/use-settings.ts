@@ -3,11 +3,13 @@ import { browser } from "wxt/browser";
 
 export interface AppSettings {
   copyImages: boolean;
+  isActive: boolean;
   lastSavedAt: number | null;
 }
 
 const defaultSettings: AppSettings = {
   copyImages: true,
+  isActive: true,
   lastSavedAt: null,
 };
 
@@ -26,6 +28,10 @@ export function useSettings() {
           result.copyImages !== undefined
             ? (result.copyImages as boolean)
             : defaultSettings.copyImages,
+        isActive:
+          result.isActive !== undefined
+            ? (result.isActive as boolean)
+            : defaultSettings.isActive,
         lastSavedAt:
           result.lastSavedAt !== undefined
             ? (result.lastSavedAt as number)

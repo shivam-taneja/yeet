@@ -5,6 +5,7 @@ import { Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ActiveState } from "@/components/popup/active-state";
 import { WrongNeighborhood } from "@/components/popup/wrong-neighborhood";
+import { useSettings } from "@/hooks/use-settings";
 
 import logoUrl from "@/assets/logo.png";
 import { browser } from "wxt/browser";
@@ -18,14 +19,14 @@ export function QuickPopup({
   active: externalActive,
   onActiveChange,
 }: QuickPopupProps) {
-  const [internalActive, setInternalActive] = useState(true);
+  const { settings, updateSettings, isLoading } = useSettings();
   const [sourcePlatform, setSourcePlatform] = useState<"X" | "Threads" | null>(
     null,
   );
   const [isInitializing, setIsInitializing] = useState(true);
 
   const isControlled = externalActive !== undefined;
-  const active = isControlled ? externalActive : internalActive;
+  const active = isControlled ? externalActive : settings.isActive;
 
   useEffect(() => {
     browser.tabs
@@ -51,7 +52,7 @@ export function QuickPopup({
     if (isControlled && onActiveChange) {
       onActiveChange(!active);
     } else {
-      setInternalActive(!active);
+      updateSettings({ isActive: !active });
     }
   };
 
@@ -85,7 +86,7 @@ export function QuickPopup({
       </div>
 
       <div className="p-5">
-        {isInitializing ? (
+        {isInitializing || isLoading ? (
           <div className="h-64 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ink"></div>
           </div>
