@@ -1,19 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import {
-  ArrowRight,
-  Check,
-  Clock3,
-  Pause,
-  Play,
-  Settings2,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PlatformBadge } from "@/components/product-preview/platform-badge";
-import { StatusPill } from "@/components/product-preview/status-pill";
+import { ActiveState } from "@/components/product-preview/active-state";
+import { WrongNeighborhood } from "@/components/product-preview/wrong-neighborhood";
 
 import logoUrl from "@/assets/logo.png";
+import { browser } from "wxt/browser";
 
 export interface QuickPopupProps {
   active?: boolean;
@@ -25,9 +19,33 @@ export function QuickPopup({
   onActiveChange,
 }: QuickPopupProps) {
   const [internalActive, setInternalActive] = useState(true);
+  const [sourcePlatform, setSourcePlatform] = useState<"X" | "Threads" | null>(
+    null,
+  );
+  const [isInitializing, setIsInitializing] = useState(true);
 
   const isControlled = externalActive !== undefined;
   const active = isControlled ? externalActive : internalActive;
+
+  useEffect(() => {
+    browser.tabs
+      .query({ active: true, currentWindow: true })
+      .then((tabs) => {
+        const url = tabs[0]?.url || "";
+        if (url.includes("x.com") || url.includes("twitter.com")) {
+          setSourcePlatform("X");
+        } else if (url.includes("threads.com")) {
+          setSourcePlatform("Threads");
+        } else {
+          setSourcePlatform(null);
+        }
+        setIsInitializing(false);
+      })
+      .catch(() => {
+        setSourcePlatform("X");
+        setIsInitializing(false);
+      });
+  }, []);
 
   const handleToggle = () => {
     if (isControlled && onActiveChange) {
@@ -58,51 +76,19 @@ export function QuickPopup({
       </div>
 
       <div className="p-5">
-        <div className="mb-5 flex items-center justify-between">
-          <StatusPill active={active} />
-          <span className="text-xs font-semibold text-ink/50">
-            2 accounts linked
-          </span>
-        </div>
-
-        <div className="rounded-2xl border-2 border-ink bg-grape p-4 text-cream">
-          <div className="flex items-center justify-center gap-3">
-            <PlatformBadge name="X" />
-            <div className="flex items-center gap-1 text-butter">
-              <span className="h-0.5 w-5 bg-butter" />
-              <ArrowRight className="size-5" />
-            </div>
-            <PlatformBadge name="Threads" />
+        {isInitializing ? (
+          <div className="h-64 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ink"></div>
           </div>
-          <p className="mt-3 text-center text-sm font-semibold">
-            {active
-              ? "Your next post will fly across."
-              : "Nothing moves while Yeet is paused."}
-          </p>
-        </div>
-
-        <div className="my-5 flex items-start gap-3 rounded-2xl border-2 border-ink bg-background p-4">
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-mint">
-            <Check className="size-5" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-sm font-bold">Last yeet landed</p>
-            <p className="mt-1 truncate text-xs text-ink/55">
-              “Small wins deserve a little noise.”
-            </p>
-            <p className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-ink/45">
-              <Clock3 className="size-3" /> 18 seconds ago
-            </p>
-          </div>
-        </div>
-
-        <Button
-          onClick={handleToggle}
-          className="h-12 w-full rounded-full border-2 border-ink bg-coral text-base font-bold text-cream shadow-[4px_4px_0_var(--color-ink)] hover:bg-coral/90"
-        >
-          {active ? <Pause className="mr-2" /> : <Play className="mr-2" />}
-          {active ? "Pause Yeet" : "Start Yeeting"}
-        </Button>
+        ) : sourcePlatform !== null ? (
+          <ActiveState
+            active={active}
+            sourcePlatform={sourcePlatform}
+            onToggle={handleToggle}
+          />
+        ) : (
+          <WrongNeighborhood />
+        )}
       </div>
     </div>
   );

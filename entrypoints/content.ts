@@ -1,6 +1,6 @@
 export default defineContentScript({
-  matches: ['*://*.google.com/*'],
+  matches: ["*://*.x.com/*", "*://*.twitter.com/*", "*://*.threads.com/*"],
   main() {
-    console.log('Hello content.');
+    console.log("[Yeet] Content script active.");
   },
 });
