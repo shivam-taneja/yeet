@@ -59,13 +59,21 @@ export function QuickPopup({
   return (
     <div className="w-full overflow-hidden border-2 border-ink bg-cream shadow-[8px_8px_0_var(--color-ink)] text-ink">
       <div className="flex items-center justify-between border-b-2 border-ink px-5 py-4">
-        <img
-          src={logoUrl}
-          alt="Yeet"
-          width={956}
-          height={444}
-          className="h-9 w-auto object-contain"
-        />
+        <button
+          onClick={() =>
+            browser.tabs.create({ url: "https://yeet.shivamtaneja.com/" })
+          }
+          className="cursor-pointer transition-transform hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 rounded-md"
+          aria-label="Visit Yeet website"
+        >
+          <img
+            src={logoUrl}
+            alt="Yeet"
+            width={956}
+            height={444}
+            className="h-9 w-auto object-contain"
+          />
+        </button>
         <Button
           variant="ghost"
           size="icon"

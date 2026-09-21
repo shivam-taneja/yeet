@@ -12,6 +12,7 @@ import { StatusPill } from "@/components/shared/status-pill";
 import { useSettings } from "@/hooks/use-settings";
 import { formatDistanceToNow } from "date-fns";
 import { useState, useEffect } from "react";
+import { browser } from "wxt/browser";
 
 export interface ActiveStateProps {
   active: boolean;
@@ -26,10 +27,36 @@ export function ActiveState({
 }: ActiveStateProps) {
   const { settings } = useSettings();
   const [now, setNow] = useState(Date.now());
+  const [linkedAccounts, setLinkedAccounts] = useState<number>(0);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 10000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const checkLinkedAccounts = async () => {
+      let count = 0;
+      try {
+        if (browser.cookies) {
+          const xCookie = await browser.cookies.get({
+            url: "https://x.com",
+            name: "auth_token",
+          });
+          if (xCookie) count++;
+
+          const threadsCookie = await browser.cookies.get({
+            url: "https://www.threads.net",
+            name: "sessionid",
+          });
+          if (threadsCookie) count++;
+        }
+      } catch (e) {
+        console.error("Failed to check cookies:", e);
+      }
+      setLinkedAccounts(count);
+    };
+    checkLinkedAccounts();
   }, []);
 
   return (
@@ -37,7 +64,7 @@ export function ActiveState({
       <div className="mb-5 flex items-center justify-between">
         <StatusPill active={active} />
         <span className="text-xs font-semibold text-ink/50">
-          2 accounts linked
+          {linkedAccounts} account{linkedAccounts !== 1 ? "s" : ""} linked
         </span>
       </div>
 

@@ -20,6 +20,11 @@ export default defineConfig({
     disabled: true,
   },
   manifest: {
-    permissions: ["activeTab", "storage"],
+    permissions: ["activeTab", "storage", "cookies"],
+    host_permissions: [
+      "*://*.x.com/*",
+      "*://*.twitter.com/*",
+      "*://*.threads.net/*",
+    ],
   },
 });

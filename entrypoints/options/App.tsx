@@ -29,13 +29,20 @@ export default function App() {
   return (
     <div className="min-h-screen bg-cream font-body text-ink flex flex-col items-center py-12 px-4 selection:bg-mint/30">
       <div className="w-full max-w-lg">
-        {/* Header */}
         <div className="flex flex-col items-center mb-10">
-          <img
-            src={logoUrl}
-            alt="Yeet"
-            className="h-16 w-auto mb-6 drop-shadow-[4px_4px_0_var(--color-ink)]"
-          />
+          <button
+            onClick={() =>
+              browser.tabs.create({ url: "https://yeet.shivamtaneja.com/" })
+            }
+            className="cursor-pointer transition-transform hover:-translate-y-1 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 rounded-xl mb-6"
+            aria-label="Visit Yeet website"
+          >
+            <img
+              src={logoUrl}
+              alt="Yeet"
+              className="h-16 w-auto drop-shadow-[4px_4px_0_var(--color-ink)]"
+            />
+          </button>
           <h1 className="text-3xl font-black font-display tracking-tight text-ink">
             Settings
           </h1>
