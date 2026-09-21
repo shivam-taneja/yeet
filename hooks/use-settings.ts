@@ -5,12 +5,18 @@ export interface AppSettings {
   copyImages: boolean;
   isActive: boolean;
   lastSavedAt: number | null;
+  lastYeet: {
+    text: string;
+    timestamp: number;
+    platform: "X" | "Threads";
+  } | null;
 }
 
 const defaultSettings: AppSettings = {
   copyImages: true,
   isActive: true,
   lastSavedAt: null,
+  lastYeet: null,
 };
 
 export function useSettings() {
@@ -36,6 +42,10 @@ export function useSettings() {
           result.lastSavedAt !== undefined
             ? (result.lastSavedAt as number)
             : defaultSettings.lastSavedAt,
+        lastYeet:
+          result.lastYeet !== undefined
+            ? (result.lastYeet as typeof defaultSettings.lastYeet)
+            : defaultSettings.lastYeet,
       }));
       setIsLoading(false);
     });

@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { MapPinOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlatformBadge } from "@/components/shared/platform-badge";
 import { browser } from "wxt/browser";
@@ -9,9 +9,9 @@ export function WrongNeighborhood() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-2 text-center">
+    <div className="flex flex-col items-center text-center">
       <div className="mb-4 grid size-12 place-items-center rounded-full border-2 border-ink bg-butter">
-        <ArrowRight className="size-6 text-ink" />
+        <MapPinOff className="size-6 text-ink" />
       </div>
       <p className="text-lg font-bold">Wrong Neighborhood</p>
       <p className="mt-2 text-sm font-semibold text-ink/70 mb-6">
