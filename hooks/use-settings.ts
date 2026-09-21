@@ -1,16 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { browser } from "wxt/browser";
-
-export interface AppSettings {
-  copyImages: boolean;
-  isActive: boolean;
-  lastSavedAt: number | null;
-  lastYeet: {
-    text: string;
-    timestamp: number;
-    platform: "X" | "Threads";
-  } | null;
-}
+import type { AppSettings } from "@/types/settings";
 
 const defaultSettings: AppSettings = {
   copyImages: true,

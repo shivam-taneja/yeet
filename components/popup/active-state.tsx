@@ -130,7 +130,9 @@ export function ActiveState({
             <Check className="size-5 text-ink" />
           </span>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-ink">Last yeet landed</p>
+            <p className="text-sm font-bold text-ink">
+              Last yeet landed on {settings.lastYeet.platform}
+            </p>
             <p className="mt-1 truncate text-xs font-semibold text-ink/70">
               "{settings.lastYeet.text}"
             </p>
