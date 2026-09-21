@@ -68,8 +68,17 @@ export function QuickPopup({
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full"
+          className="rounded-full hover:bg-ink/5"
           aria-label="Open settings"
+          onClick={() => {
+            try {
+              browser.tabs.create({
+                url: browser.runtime.getURL("/options.html"),
+              });
+            } catch (e) {
+              window.open(browser.runtime.getURL("/options.html"));
+            }
+          }}
         >
           <Settings2 className="size-5" />
         </Button>
