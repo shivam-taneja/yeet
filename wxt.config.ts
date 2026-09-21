@@ -21,6 +21,13 @@ export default defineConfig({
   },
   manifest: {
     permissions: ["activeTab", "storage", "cookies"],
-    host_permissions: ["*://*.x.com/*", "*://*.threads.com/*"],
+    host_permissions: [
+      "*://*.x.com/*",
+      "*://x.com/*",
+      "*://*.threads.com/*",
+      "*://threads.com/*",
+      "*://*.instagram.com/*",
+      "*://instagram.com/*",
+    ],
   },
 });
