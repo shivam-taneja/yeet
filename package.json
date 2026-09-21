@@ -1,8 +1,14 @@
 {
-  "name": "wxt-react-starter",
-  "description": "manifest.json description",
+  "name": "Yeet",
+  "description": "Write once. Land everywhere. Automatically cross-post your thoughts between X and Threads.",
+  "author": "Shivam Taneja <contact@shivamtaneja.com>",
+  "homepage": "https://yeet.shivamtaneja.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shivam-taneja/yeet"
+  },
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -21,6 +27,7 @@
   "devDependencies": {
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@wxt-dev/auto-icons": "^1.1.2",
     "@wxt-dev/module-react": "^1.1.5",
     "typescript": "^5.9.3",
     "web-ext": "^10.5.0",
