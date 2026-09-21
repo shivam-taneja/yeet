@@ -3,7 +3,7 @@ import { FALLBACK_SELECTORS } from "@/lib/constants";
 import { extractTextFromLexicalEditor } from "@/lib/dom-utils";
 
 export default defineContentScript({
-  matches: ["*://*.threads.com/*", "*://*.threads.net/*"],
+  matches: ["*://*.threads.com/*"],
   main() {
     console.log("[Yeet] Threads Content Script woke up. Ready to auto-yeet.");
 
