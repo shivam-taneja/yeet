@@ -13,6 +13,7 @@ import { useSettings } from "@/hooks/use-settings";
 import { formatDistanceToNow } from "date-fns";
 import { useState, useEffect } from "react";
 import { browser } from "wxt/browser";
+import { cn } from "@/lib/utils";
 
 export interface ActiveStateProps {
   active: boolean;
@@ -153,11 +154,12 @@ export function ActiveState({
       <Button
         onClick={onToggle}
         disabled={!isTargetLoggedIn}
-        className={`h-12 w-full rounded-full border-2 border-ink bg-coral text-base font-bold text-cream shadow-[4px_4px_0_var(--color-ink)] transition-transform ${
+        className={cn(
+          "h-12 w-full rounded-full border-2 border-ink bg-coral text-base font-bold text-cream shadow-[4px_4px_0_var(--color-ink)] transition-transform",
           !isTargetLoggedIn
             ? "opacity-50 cursor-not-allowed translate-y-1 shadow-[0px_0px_0_var(--color-ink)]"
-            : "hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--color-ink)] active:translate-y-1 active:shadow-[0px_0px_0_var(--color-ink)]"
-        }`}
+            : "hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--color-ink)] active:translate-y-1 active:shadow-[0px_0px_0_var(--color-ink)]",
+        )}
       >
         {active ? <Pause className="mr-2" /> : <Play className="mr-2" />}
         {active ? "Pause Yeet" : "Start Yeeting"}

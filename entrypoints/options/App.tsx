@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { browser } from "wxt/browser";
 import { useSettings } from "@/hooks/use-settings";
+import { cn } from "@/lib/utils";
 import logoUrl from "@/assets/logo.png";
 
 export default function App() {
@@ -71,14 +72,16 @@ export default function App() {
               role="switch"
               aria-checked={settings.copyImages}
               onClick={handleToggle}
-              className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 ${
-                settings.copyImages ? "bg-mint" : "bg-ink/10"
-              }`}
+              className={cn(
+                "relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2",
+                settings.copyImages ? "bg-mint" : "bg-ink/10",
+              )}
             >
               <span
-                className={`pointer-events-none block h-5 w-5 rounded-full bg-cream border-2 border-ink shadow-[2px_2px_0_var(--color-ink)] transition-transform ${
-                  settings.copyImages ? "translate-x-2" : "-translate-x-2"
-                }`}
+                className={cn(
+                  "pointer-events-none block h-5 w-5 rounded-full bg-cream border-2 border-ink shadow-[2px_2px_0_var(--color-ink)] transition-transform",
+                  settings.copyImages ? "translate-x-2" : "-translate-x-2",
+                )}
               />
             </button>
           </div>
