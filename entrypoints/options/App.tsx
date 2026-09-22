@@ -66,32 +66,15 @@ export default function App() {
             Preferences
           </h2>
 
-          <div className="flex items-center justify-between py-2">
-            <div className="pr-6">
-              <p className="font-bold text-lg font-display">Copy Media</p>
-              <p className="text-sm font-semibold text-ink/60 mt-1">
-                Automatically include images and videos when yeeting posts
-                across platforms.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              role="switch"
-              aria-checked={settings.copyImages}
-              onClick={handleToggle}
-              className={cn(
-                "relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2",
-                settings.copyImages ? "bg-mint" : "bg-ink/10",
-              )}
-            >
-              <span
-                className={cn(
-                  "pointer-events-none block h-5 w-5 rounded-full bg-cream border-2 border-ink shadow-[2px_2px_0_var(--color-ink)] transition-transform",
-                  settings.copyImages ? "translate-x-2" : "-translate-x-2",
-                )}
-              />
-            </button>
+          <div className="flex flex-col">
+            <SettingRow
+              label="Copy Media"
+              description="Automatically include images, videos, and GIFs when yeeting posts across platforms."
+              checked={false}
+              locked
+              comingSoon
+              onChange={() => {}}
+            />
           </div>
         </div>
 
@@ -106,14 +89,6 @@ export default function App() {
           </p>
 
           <div className="flex flex-col divide-y-2 divide-ink/10">
-            <SettingRow
-              label="New Posts"
-              description="Standard new posts from the compose button or home feed."
-              checked={true}
-              locked
-              onChange={() => {}}
-            />
-
             <SettingRow
               label="Mention Posts"
               description={`When composing from someone's profile. Note: their @handle may differ on Threads.`}
