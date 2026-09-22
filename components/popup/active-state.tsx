@@ -5,6 +5,7 @@ import {
   Pause,
   Play,
   AlertCircle,
+  Construction,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlatformBadge } from "@/components/shared/platform-badge";
@@ -74,6 +75,9 @@ export function ActiveState({
       : authStatus.x
     : true;
 
+  // Threads → X is not yet supported
+  const isComingSoon = sourcePlatform === "Threads";
+
   return (
     <>
       <div className="mb-5 flex items-center justify-between">
@@ -83,23 +87,64 @@ export function ActiveState({
         </span>
       </div>
 
-      <div className="rounded-2xl border-2 border-ink bg-grape p-4 text-cream">
+      <div
+        className={cn(
+          "rounded-2xl border-2 border-ink p-4 text-cream",
+          isComingSoon ? "bg-ink/60" : "bg-grape",
+        )}
+      >
         <div className="flex items-center justify-center gap-3">
           <PlatformBadge name={sourcePlatform} />
-          <div className="flex items-center gap-1 text-butter">
-            <span className="h-0.5 w-5 bg-butter" />
-            <ArrowRight className="size-5" />
-          </div>
+          {isComingSoon ? (
+            <div className="flex items-center gap-1 text-butter/70">
+              <span className="h-px w-4 border-t-2 border-dashed border-butter/70" />
+              <ArrowRight className="size-5 opacity-50" />
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 text-butter">
+              <span className="h-0.5 w-5 bg-butter" />
+              <ArrowRight className="size-5" />
+            </div>
+          )}
           <PlatformBadge name={targetPlatform} />
         </div>
-        <p className="mt-3 text-center text-sm font-semibold">
-          {active
-            ? `Your next post will fly across to ${targetPlatform}.`
-            : "Nothing moves while Yeet is paused."}
-        </p>
+        {isComingSoon ? (
+          <div className="mt-3 flex items-center justify-center gap-1.5">
+            <Construction className="size-3.5 text-butter/70" />
+            <p className="text-center text-xs font-bold text-butter/70 uppercase tracking-widest">
+              Coming soon
+            </p>
+          </div>
+        ) : (
+          <p className="mt-3 text-center text-sm font-semibold">
+            {active
+              ? `Your next post will fly across to ${targetPlatform}.`
+              : "Nothing moves while Yeet is paused."}
+          </p>
+        )}
       </div>
 
-      {!isTargetLoggedIn ? (
+      {isComingSoon ? (
+        <div className="my-5 flex items-start gap-3 rounded-2xl border-2 border-dashed border-ink/30 bg-ink/5 p-4 text-ink/60">
+          <Construction className="size-5 shrink-0 mt-0.5" />
+          <div className="min-w-0 w-full">
+            <p className="text-sm font-bold text-ink/70">
+              Threads → X is coming soon
+            </p>
+            <p className="mt-1 text-xs font-semibold">
+              We're working on it. X → Threads works great in the meantime!
+            </p>
+            <Button
+              variant="outline"
+              className="mt-3 h-12 w-full justify-start gap-3 rounded-xl border-2 border-ink bg-cream font-bold hover:bg-ink/5 shadow-[2px_2px_0_var(--color-ink)] transition-transform hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--color-ink)] active:translate-y-1 active:shadow-none"
+              onClick={() => browser.tabs.create({ url: "https://x.com" })}
+            >
+              <PlatformBadge name="X" />
+              <span className="font-bold text-base">Open X to Yeet</span>
+            </Button>
+          </div>
+        </div>
+      ) : !isTargetLoggedIn ? (
         <div className="my-5 flex items-start gap-3 rounded-2xl border-2 border-ink border-dashed bg-coral/10 p-4 text-ink">
           <AlertCircle className="size-5 shrink-0 text-coral" />
           <div className="min-w-0 w-full">
@@ -155,16 +200,22 @@ export function ActiveState({
 
       <Button
         onClick={onToggle}
-        disabled={!isTargetLoggedIn}
+        disabled={!isTargetLoggedIn || isComingSoon}
         className={cn(
           "h-12 w-full rounded-full border-2 border-ink bg-coral text-base font-bold text-cream shadow-[4px_4px_0_var(--color-ink)] transition-transform",
-          !isTargetLoggedIn
-            ? "opacity-50 cursor-not-allowed translate-y-1 shadow-[0px_0px_0_var(--color-ink)]"
+          !isTargetLoggedIn || isComingSoon
+            ? "opacity-40 cursor-not-allowed translate-y-1 shadow-[0px_0px_0_var(--color-ink)]"
             : "hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--color-ink)] active:translate-y-1 active:shadow-[0px_0px_0_var(--color-ink)]",
         )}
       >
-        {active ? <Pause className="mr-2" /> : <Play className="mr-2" />}
-        {active ? "Pause Yeet" : "Start Yeeting"}
+        {isComingSoon ? (
+          <Construction className="mr-2" />
+        ) : active ? (
+          <Pause className="mr-2" />
+        ) : (
+          <Play className="mr-2" />
+        )}
+        {isComingSoon ? "Coming Soon" : active ? "Pause Yeet" : "Start Yeeting"}
       </Button>
     </>
   );

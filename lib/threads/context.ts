@@ -40,14 +40,31 @@ export function observeAndTagThreadsComposers() {
     });
   });
 
-  observer.observe(document.body, { childList: true, subtree: true });
+  const targetNode = document.documentElement || document.body;
+  observer.observe(targetNode, { childList: true, subtree: true });
 }
 export function getThreadsComposerContext(
   editorElement: Element | null,
 ): ComposerContext {
   if (!editorElement) return "unknown";
-  return (
-    (editorElement.getAttribute("data-yeet-context") as ComposerContext) ||
-    "unknown"
-  );
+
+  // First, try the cached attribute set by our observer.
+  const cached = editorElement.getAttribute(
+    "data-yeet-context",
+  ) as ComposerContext;
+  if (cached && cached !== "unknown") return cached;
+
+  // Fallback: derive context directly from aria-placeholder (handles race conditions
+  // where the observer hasn't fired yet before the user clicks Post).
+  const placeholder = editorElement.getAttribute("aria-placeholder") || "";
+  if (/what's new/i.test(placeholder)) return "new-post";
+  if (/reply/i.test(placeholder)) return "reply";
+  if (/share your thoughts/i.test(placeholder)) return "quote";
+  if (/say more/i.test(placeholder)) return "thread";
+
+  // Last resort: check if text starts with @ (mention from profile page)
+  const text = editorElement.textContent?.trim() || "";
+  if (text.startsWith("@")) return "mention-post";
+
+  return "unknown";
 }

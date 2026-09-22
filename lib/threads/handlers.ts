@@ -12,9 +12,13 @@ export function handleThreadsPostClick(
   const target = e.target as HTMLElement;
   const postBtn = target.closest(selectors.threads.postButton);
 
-  if (postBtn && postBtn.textContent?.toLowerCase().trim() === "post") {
-    console.log("[Yeet] Intercepted Threads Post button click.");
-    doYeetToX(e, selectors);
+  if (postBtn) {
+    const text = postBtn.textContent?.toLowerCase().trim() || "";
+    // Match exactly 'post' or if it contains 'post' (e.g. with icons) and is short.
+    if (text === "post" || (text.includes("post") && text.length < 15)) {
+      console.log("[Yeet] Intercepted Threads Post button click.");
+      doYeetToX(e, selectors);
+    }
   }
 }
 

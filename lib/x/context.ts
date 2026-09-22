@@ -46,7 +46,8 @@ export function observeAndTagComposers() {
     });
   });
 
-  observer.observe(document.body, { childList: true, subtree: true });
+  const targetNode = document.documentElement || document;
+  observer.observe(targetNode, { childList: true, subtree: true });
 }
 
 export function getComposerContext(

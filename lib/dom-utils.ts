@@ -16,11 +16,10 @@ export function extractTextFromDraftEditor(container: Element | null): string {
 }
 
 export function extractTextFromLexicalEditor(
-  containerSelector: string,
+  container: Element | null,
 ): string {
-  const container = document.querySelector(containerSelector) as HTMLElement;
   if (!container) return "";
 
   // Lexical editor uses innerText quite well for newlines
-  return container.innerText.trim();
+  return (container as HTMLElement).innerText.trim();
 }

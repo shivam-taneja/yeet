@@ -1,16 +1,14 @@
 import { browser } from "wxt/browser";
 import { FALLBACK_SELECTORS } from "@/lib/constants";
-import {
-  handleThreadsPostClick,
-  handleThreadsPostKeydown,
-  handleThreadsAutoPost,
-} from "@/lib/threads/handlers";
-import { observeAndTagThreadsComposers } from "@/lib/threads/context";
+import { handleThreadsAutoPost } from "@/lib/threads/handlers";
 
 export default defineContentScript({
   matches: ["*://*.threads.com/*"],
   main() {
-    console.log("[Yeet] Threads Content Script woke up. Ready to auto-yeet.");
+    console.log("[Yeet] Threads Content Script woke up.");
+    console.log(
+      "[Yeet] ℹ️  Threads → X cross-posting is coming soon. X → Threads is active.",
+    );
 
     let SELECTORS = FALLBACK_SELECTORS;
     browser.storage.local.get(["selectors"]).then((res) => {
@@ -19,20 +17,7 @@ export default defineContentScript({
       }
     });
 
-    // Start tracking context
-    observeAndTagThreadsComposers();
-
-    // Attach event listeners
-    document.addEventListener(
-      "click",
-      (e) => handleThreadsPostClick(e, SELECTORS),
-      true,
-    );
-    document.addEventListener(
-      "keydown",
-      (e) => handleThreadsPostKeydown(e, SELECTORS),
-      true,
-    );
+    // X → Threads auto-post: fires when this page is opened as an intent URL
     handleThreadsAutoPost(SELECTORS);
   },
 });

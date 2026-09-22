@@ -17,12 +17,22 @@ export async function doYeetToX(
   ]);
   if (storage.isActive === false) return;
 
-  // Use the DOM target (the post button) to find the closest composer container
-  // and get its tagged context. If we can't find it via target, try to find ANY composer.
+  // Find the active editor by finding all composers and picking the one that has text.
+  // This bypasses the complex obfuscated DOM tree.
   const target = e?.target as HTMLElement | undefined;
-  const editorElement =
-    target?.closest(selectors.threads.composer) ||
-    document.querySelector(selectors.threads.composer);
+  let editorElement: Element | null =
+    target?.closest(selectors.threads.composer) || null;
+
+  if (!editorElement) {
+    const allComposers = Array.from(
+      document.querySelectorAll(selectors.threads.composer),
+    );
+    editorElement = (allComposers.find(
+      (c) => extractTextFromLexicalEditor(c) !== "",
+    ) ||
+      allComposers[0] ||
+      null) as Element | null;
+  }
 
   const context = getThreadsComposerContext(editorElement);
 
@@ -39,7 +49,7 @@ export async function doYeetToX(
     return;
   }
 
-  const text = extractTextFromLexicalEditor(selectors.threads.composer);
+  const text = extractTextFromLexicalEditor(editorElement);
   if (!text) {
     console.log("[Yeet] No text found to cross-post.");
     return;

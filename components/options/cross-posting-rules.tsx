@@ -11,15 +11,6 @@ export function CrossPostingRules() {
     });
   };
 
-  const handleThreadsContext = (key: XContext) => {
-    updateSettings({
-      threadsContexts: {
-        ...settings.threadsContexts,
-        [key]: !settings.threadsContexts[key],
-      },
-    });
-  };
-
   return (
     <div className="w-full overflow-hidden rounded-[24px] border-2 border-ink bg-white shadow-[8px_8px_0_var(--color-ink)] p-8 relative mb-6">
       <div className="flex items-center justify-between border-b-2 border-ink pb-4 mb-2">
@@ -50,8 +41,10 @@ export function CrossPostingRules() {
           description="When composing from a profile page. Note: their @handle may differ on the destination platform."
           xChecked={settings.xContexts["mention-post"]}
           onXChange={() => handleXContext("mention-post")}
-          threadsChecked={settings.threadsContexts["mention-post"]}
-          onThreadsChange={() => handleThreadsContext("mention-post")}
+          threadsChecked={false}
+          onThreadsChange={() => {}}
+          threadsLocked
+          threadsComingSoon
         />
 
         <MatrixSettingRow
@@ -59,8 +52,10 @@ export function CrossPostingRules() {
           description="When you quote someone's post. Cross-posts your comment text only."
           xChecked={settings.xContexts["quote"]}
           onXChange={() => handleXContext("quote")}
-          threadsChecked={settings.threadsContexts["quote"]}
-          onThreadsChange={() => handleThreadsContext("quote")}
+          threadsChecked={false}
+          onThreadsChange={() => {}}
+          threadsLocked
+          threadsComingSoon
         />
 
         <MatrixSettingRow
@@ -68,8 +63,10 @@ export function CrossPostingRules() {
           description="When you reply to a post. Not recommended — replies often lack context when yeeted."
           xChecked={settings.xContexts["reply"]}
           onXChange={() => handleXContext("reply")}
-          threadsChecked={settings.threadsContexts["reply"]}
-          onThreadsChange={() => handleThreadsContext("reply")}
+          threadsChecked={false}
+          onThreadsChange={() => {}}
+          threadsLocked
+          threadsComingSoon
         />
 
         <MatrixSettingRow
