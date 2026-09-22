@@ -10,29 +10,39 @@ export const defaultXContexts: AppSettings["xContexts"] = {
 
 export function observeAndTagComposers() {
   const observer = new MutationObserver(() => {
-    const placeholders = document.querySelectorAll(
-      ".public-DraftEditorPlaceholder-inner",
+    const textboxes = document.querySelectorAll(
+      '[role="textbox"][data-testid^="tweetTextarea_"]',
     );
 
-    placeholders.forEach((p) => {
-      const text = p.textContent?.trim();
-      if (!text) return;
+    textboxes.forEach((textbox) => {
+      if (textbox.hasAttribute("data-yeet-context")) return;
 
-      // Find the associated editor wrapper
-      const wrapper = p.closest('[data-testid$="_label"]');
+      const wrapper = textbox.closest('[data-testid$="_label"]');
       if (!wrapper) return;
 
-      const textbox = wrapper.querySelector('[role="textbox"]');
-      if (textbox && !textbox.hasAttribute("data-yeet-context")) {
-        let ctx = "unknown";
+      let ctx = "unknown";
+
+      // 1. Try to find the placeholder
+      const placeholder = wrapper.querySelector(
+        ".public-DraftEditorPlaceholder-inner",
+      );
+
+      if (placeholder) {
+        const text = placeholder.textContent?.trim() || "";
         if (/happening/i.test(text)) ctx = "new-post";
         else if (/reply/i.test(text)) ctx = "reply";
         else if (/comment/i.test(text)) ctx = "quote";
         else if (/another post/i.test(text)) ctx = "thread";
-        else if (/^@/.test(text)) ctx = "mention-post";
-
-        textbox.setAttribute("data-yeet-context", ctx);
+      } else {
+        // 2. If no placeholder exists, it might be pre-filled (like a mention post).
+        // Draft.js editor contents are nested inside the textbox.
+        const text = textbox.textContent?.trim() || "";
+        if (text.startsWith("@")) {
+          ctx = "mention-post";
+        }
       }
+
+      textbox.setAttribute("data-yeet-context", ctx);
     });
   });
 
