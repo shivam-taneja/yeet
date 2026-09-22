@@ -12,6 +12,13 @@ const defaultSettings: AppSettings = {
     reply: false,
     thread: false,
   },
+  threadsContexts: {
+    "new-post": true,
+    "mention-post": false,
+    quote: false,
+    reply: false,
+    thread: false,
+  },
   lastSavedAt: null,
   lastYeet: null,
 };

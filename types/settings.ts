@@ -13,6 +13,7 @@ export interface AppSettings {
   copyImages: boolean;
   isActive: boolean;
   xContexts: Record<XContext, boolean>;
+  threadsContexts: Record<XContext, boolean>;
   lastSavedAt: number | null;
   lastYeet: {
     text: string;
