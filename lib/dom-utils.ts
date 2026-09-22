@@ -1,11 +1,17 @@
 export function extractTextFromDraftEditor(container: Element | null): string {
   if (!container) return "";
 
-  const textBlocks = container.querySelectorAll('[data-text="true"]');
+  const blocks = container.querySelectorAll('[data-block="true"]');
   let text = "";
-  textBlocks.forEach((block) => {
-    text += block.textContent + "\n";
+
+  blocks.forEach((block) => {
+    const textSpans = block.querySelectorAll('[data-text="true"]');
+    textSpans.forEach((span) => {
+      text += span.textContent;
+    });
+    text += "\n";
   });
+
   return text.trim();
 }
 
