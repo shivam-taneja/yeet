@@ -93,6 +93,18 @@ export function QuickPopup({
         </Button>
       </div>
 
+      {import.meta.env.VITE_DEV_MODE === "true" && (
+        <div className="flex items-center justify-center gap-2 bg-amber-400 border-b-2 border-ink px-4 py-1.5">
+          <span className="relative flex size-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-ink opacity-60" />
+            <span className="relative inline-flex rounded-full size-2 bg-ink" />
+          </span>
+          <p className="text-[11px] font-black uppercase tracking-widest text-ink">
+            Dev Mode — posts won't YEET
+          </p>
+        </div>
+      )}
+
       <div className="p-5">
         {isInitializing || isLoading ? (
           <div className="h-64 flex items-center justify-center">

@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { browser } from "wxt/browser";
 import { useSettings } from "@/hooks/use-settings";
-import { cn } from "@/lib/utils";
 import logoUrl from "@/assets/logo.png";
+import type { XContext } from "@/types/settings";
+import { SettingRow } from "@/components/shared/setting-row";
+import { cn } from "@/lib/utils";
 
 export default function App() {
   const { settings, updateSettings, isLoading } = useSettings();
@@ -16,6 +18,12 @@ export default function App() {
 
   const handleToggle = () => {
     updateSettings({ copyImages: !settings.copyImages });
+  };
+
+  const handleXContext = (key: XContext) => {
+    updateSettings({
+      xContexts: { ...settings.xContexts, [key]: !settings.xContexts[key] },
+    });
   };
 
   const getRelativeTime = () => {
@@ -84,6 +92,58 @@ export default function App() {
                 )}
               />
             </button>
+          </div>
+        </div>
+
+        {/* X Post Types */}
+        <div className="w-full mt-6 overflow-hidden rounded-[24px] border-2 border-ink bg-white shadow-[8px_8px_0_var(--color-ink)] p-8 relative">
+          <h2 className="text-xl font-bold font-display border-b-2 border-ink pb-4 mb-6 text-ink flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-grape inline-block"></span>
+            X Post Types
+          </h2>
+          <p className="text-sm font-semibold text-ink/50 mb-6 -mt-2">
+            Choose which types of X posts get yeeted across to Threads.
+          </p>
+
+          <div className="flex flex-col divide-y-2 divide-ink/10">
+            <SettingRow
+              label="New Posts"
+              description="Standard new posts from the compose button or home feed."
+              checked={true}
+              locked
+              onChange={() => {}}
+            />
+
+            <SettingRow
+              label="Mention Posts"
+              description={`When composing from someone's profile. Note: their @handle may differ on Threads.`}
+              checked={settings.xContexts["mention-post"]}
+              onChange={() => handleXContext("mention-post")}
+            />
+
+            <SettingRow
+              label="Quote Posts"
+              description="When you quote someone's tweet. Cross-posts your comment text only."
+              checked={settings.xContexts["quote"]}
+              onChange={() => handleXContext("quote")}
+            />
+
+            <SettingRow
+              label="Replies"
+              description="When you reply to a tweet. Not recommended — replies often lack context on Threads."
+              checked={settings.xContexts["reply"]}
+              onChange={() => handleXContext("reply")}
+            />
+
+            {/* Thread continuation — coming soon */}
+            <SettingRow
+              label="Thread Continuation"
+              description="Append to an existing Threads post. Coming soon."
+              checked={false}
+              locked
+              comingSoon
+              onChange={() => {}}
+            />
           </div>
         </div>
 

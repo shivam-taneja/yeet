@@ -5,6 +5,13 @@ import type { AppSettings } from "@/types/settings";
 const defaultSettings: AppSettings = {
   copyImages: true,
   isActive: true,
+  xContexts: {
+    "new-post": true,
+    "mention-post": false,
+    quote: false,
+    reply: false,
+    thread: false,
+  },
   lastSavedAt: null,
   lastYeet: null,
 };
@@ -28,6 +35,10 @@ export function useSettings() {
           result.isActive !== undefined
             ? (result.isActive as boolean)
             : defaultSettings.isActive,
+        xContexts:
+          result.xContexts !== undefined
+            ? (result.xContexts as AppSettings["xContexts"])
+            : defaultSettings.xContexts,
         lastSavedAt:
           result.lastSavedAt !== undefined
             ? (result.lastSavedAt as number)

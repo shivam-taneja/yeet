@@ -18,10 +18,23 @@ https://github.com/user-attachments/assets/1b7b4be9-996c-411b-a182-0f14d98a52e6
 - Settings toggle to easily turn the extension on and off.
 - Fully typed with TypeScript and built on top of the robust WXT framework.
 
-## TODO
+## TODO / Roadmap
 
-- [ ] Images — yeet attached photos from the X composer to Threads, and the other way
-- [ ] Videos — same for video / GIF attachments
+Check out the [TODO.md](./TODO.md) file for the full list of planned features, including media support and resilient retries.
+
+## X Post Contexts
+
+Yeet uses X's `tweetTextarea_0_label` element to detect what type of post is being composed, and gates cross-posting accordingly. Each context maps to a toggle in Settings.
+
+| Label text            | Context       | Default        | Notes                                                                                    |
+| --------------------- | ------------- | -------------- | ---------------------------------------------------------------------------------------- |
+| `"What's happening?"` | `newPost`     | ✅ Always on   | Standard new post — can't be disabled                                                    |
+| `"@username"`         | `mentionPost` | ❌ Off         | Composing from someone's profile; their @handle may not match on Threads                 |
+| `"Add a comment"`     | `quote`       | ❌ Off         | Quote tweet — cross-posts comment text only (quoted tweet URL not accessible in X's DOM) |
+| `"Post your reply"`   | `reply`       | ❌ Off         | Replies lack context on Threads, off by default                                          |
+| `"Add another post"`  | `thread`      | 🔒 Coming soon | Thread continuation — needs logic to find and append to existing Threads post            |
+
+Any label not in this list is treated as `unknown` and blocked by default.
 
 ## Project Structure
 
@@ -73,6 +86,18 @@ pnpm dev
 ```
 
 This will automatically build the extension into the `.output/chrome-mv3-dev` directory.
+
+### Environment Variables
+
+Copy `.env.example` to `.env` before running locally:
+
+```bash
+cp .env.example .env
+```
+
+| Variable        | Values           | Description                                                                                                                                                       |
+| --------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_DEV_MODE` | `true` / `false` | When `true`, cross-posting is intercepted — posts are logged to the console instead of actually being sent. Set to `true` while developing to avoid double posts. |
 
 ### Loading the Extension
 

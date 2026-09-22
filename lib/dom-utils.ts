@@ -1,5 +1,4 @@
-export function extractTextFromDraftEditor(containerSelector: string): string {
-  const container = document.querySelector(containerSelector);
+export function extractTextFromDraftEditor(container: Element | null): string {
   if (!container) return "";
 
   const textBlocks = container.querySelectorAll('[data-text="true"]');

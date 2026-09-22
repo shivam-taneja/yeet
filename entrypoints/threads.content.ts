@@ -43,6 +43,14 @@ export default defineContentScript({
         },
       });
 
+      if (import.meta.env.VITE_DEV_MODE === "true") {
+        console.log(
+          "[Yeet] 🛠️ DEV MODE — skipping actual cross-post to X. Would have opened:",
+          url,
+        );
+        return;
+      }
+
       browser.runtime.sendMessage({ action: "openBackgroundTab", url });
     }
 
