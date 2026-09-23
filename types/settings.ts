@@ -19,5 +19,6 @@ export interface AppSettings {
     text: string;
     timestamp: number;
     platform: "X" | "Threads";
+    postUrl?: string;
   } | null;
 }

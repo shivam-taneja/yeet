@@ -12,29 +12,15 @@ https://github.com/user-attachments/assets/1b7b4be9-996c-411b-a182-0f14d98a52e6
 ## Features
 
 - Cross-post from X to Threads automatically.
-- Cross-post from Threads to X automatically.
+- Cross-post from Threads to X automatically. (Temporarily disabled due to Threads DOM changes, coming soon!)
 - Supports standard mouse clicks and Cmd/Ctrl + Enter shortcuts.
 - Gracefully handles character limits (e.g., 280 for X, 500 for Threads).
+- Clickable post link in the popup to instantly view your newly yeeted post.
 - Settings toggle to easily turn the extension on and off.
-- Fully typed with TypeScript and built on top of the robust WXT framework.
 
 ## TODO / Roadmap
 
 Check out the [TODO.md](./TODO.md) file for the full list of planned features, including media support and resilient retries.
-
-## X Post Contexts
-
-Yeet uses X's `tweetTextarea_0_label` element to detect what type of post is being composed, and gates cross-posting accordingly. Each context maps to a toggle in Settings.
-
-| Label text            | Context       | Default        | Notes                                                                                    |
-| --------------------- | ------------- | -------------- | ---------------------------------------------------------------------------------------- |
-| `"What's happening?"` | `newPost`     | ✅ Always on   | Standard new post — can't be disabled                                                    |
-| `"@username"`         | `mentionPost` | ❌ Off         | Composing from someone's profile; their @handle may not match on Threads                 |
-| `"Add a comment"`     | `quote`       | ❌ Off         | Quote tweet — cross-posts comment text only (quoted tweet URL not accessible in X's DOM) |
-| `"Post your reply"`   | `reply`       | ❌ Off         | Replies lack context on Threads, off by default                                          |
-| `"Add another post"`  | `thread`      | 🔒 Coming soon | Thread continuation — needs logic to find and append to existing Threads post            |
-
-Any label not in this list is treated as `unknown` and blocked by default.
 
 ## Project Structure
 

@@ -68,10 +68,36 @@ export async function handleThreadsAutoPost(
 
       postButton.click();
 
-      setTimeout(() => {
-        console.log("[Yeet] Closing tab.");
+      // Listen for the intercepted API response from our MAIN world script
+      const messageListener = (event: MessageEvent) => {
+        if (event.data?.type === "YEET_POST_SUCCESS" && event.data.permalink) {
+          console.log(
+            "[Yeet] Received post URL from interceptor:",
+            event.data.permalink,
+          );
+          window.removeEventListener("message", messageListener);
+          clearTimeout(fallbackTimer);
+
+          browser.storage.local.get(["lastYeet"]).then((res) => {
+            if (res.lastYeet) {
+              browser.storage.local.set({
+                lastYeet: { ...res.lastYeet, postUrl: event.data.permalink },
+              });
+            }
+            console.log("[Yeet] Closing tab.");
+            browser.runtime.sendMessage({ action: "closeTab" });
+          });
+        }
+      };
+
+      window.addEventListener("message", messageListener);
+
+      // Fallback: close after 5 seconds if API interception fails
+      const fallbackTimer = setTimeout(() => {
+        window.removeEventListener("message", messageListener);
+        console.log("[Yeet] Closing tab (fallback timeout).");
         browser.runtime.sendMessage({ action: "closeTab" });
-      }, 3000);
+      }, 5000);
     }
   });
 
