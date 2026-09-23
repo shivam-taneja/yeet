@@ -27,9 +27,10 @@ export default defineBackground(() => {
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "openBackgroundTab" && message.url) {
       console.log("[Yeet] Opening background tab:", message.url);
-      // X intent tabs must be opened in the foreground — Chrome throttles background
-      // tab JS execution and X's strict CSP blocks any workaround scripts.
-      browser.tabs.create({ url: message.url, active: true });
+      // Chrome throttles background tabs, so X intent URLs must be active
+      const isXIntent =
+        message.url.includes("x.com") || message.url.includes("twitter.com");
+      browser.tabs.create({ url: message.url, active: isXIntent });
     }
 
     if (message.action === "closeTab") {
