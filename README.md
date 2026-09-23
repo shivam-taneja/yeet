@@ -98,6 +98,23 @@ cp .env.example .env
 4. Select the `.output/chrome-mv3-dev` folder from your cloned `yeet` project directory.
 5. The extension is now loaded and will automatically refresh when you make code changes!
 
+## Releasing
+
+Yeet uses a fully automated GitHub Actions pipeline for building and releasing updates.
+To create a new release with downloadable `.zip` files for Chrome and Firefox, simply run:
+
+```bash
+pnpm version patch  # (use 'minor' or 'major' for larger updates)
+git push --follow-tags
+```
+
+This will automatically:
+
+1. Bump the version inside `package.json` and create a Git commit.
+2. Create a new version tag (e.g., `v1.2.6`).
+3. Push to GitHub and trigger the automated workflow.
+4. Build the extension zips and attach them to a brand new GitHub Release page with an auto-generated changelog!
+
 ## Contributing
 
 Contributions are welcome! If you'd like to help improve Yeet, please follow these steps:
