@@ -1,4 +1,5 @@
 import { browser } from "wxt/browser";
+import { BackgroundAction } from "@/types/messaging";
 
 export default defineBackground(() => {
   console.log("[Yeet] Background service worker registered.");
@@ -32,7 +33,10 @@ export default defineBackground(() => {
 
   // Listen for messages from content scripts
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === "openBackgroundTab" && message.url) {
+    if (
+      message.action === BackgroundAction.OPEN_BACKGROUND_TAB &&
+      message.url
+    ) {
       console.log("[Yeet] Opening background tab:", message.url);
       // Chrome throttles background tabs, so X intent URLs must be active
       const isXIntent =
@@ -40,7 +44,7 @@ export default defineBackground(() => {
       browser.tabs.create({ url: message.url, active: isXIntent });
     }
 
-    if (message.action === "closeTab") {
+    if (message.action === BackgroundAction.CLOSE_TAB) {
       if (sender.tab?.id) {
         console.log("[Yeet] Closing tab:", sender.tab.id);
         browser.tabs.remove(sender.tab.id);

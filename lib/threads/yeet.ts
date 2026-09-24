@@ -1,15 +1,17 @@
 import { browser } from "wxt/browser";
 import { extractTextFromLexicalEditor } from "@/lib/dom-utils";
 import type { AppSettings } from "@/types/settings";
-import type { FALLBACK_SELECTORS } from "@/lib/constants";
+import { YeetProgressStatus } from "@/types/settings";
+import type { SelectorsConfig } from "@/types/selectors";
 import {
   getThreadsComposerContext,
   defaultThreadsContexts,
 } from "@/lib/threads/context";
+import { BackgroundAction } from "@/types/messaging";
 
 export async function doYeetToX(
   e: Event | null,
-  selectors: typeof FALLBACK_SELECTORS,
+  selectors: SelectorsConfig,
 ): Promise<void> {
   const storage = await browser.storage.local.get([
     "isActive",
@@ -72,6 +74,7 @@ export async function doYeetToX(
       timestamp: Date.now(),
       platform: "X",
     },
+    yeetProgress: { status: YeetProgressStatus.YEETING },
   });
 
   if (import.meta.env.VITE_DEV_MODE === "true") {
@@ -82,5 +85,8 @@ export async function doYeetToX(
     return;
   }
 
-  browser.runtime.sendMessage({ action: "openBackgroundTab", url });
+  browser.runtime.sendMessage({
+    action: BackgroundAction.OPEN_BACKGROUND_TAB,
+    url,
+  });
 }

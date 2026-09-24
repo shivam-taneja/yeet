@@ -7,6 +7,7 @@
 - [ ] **Thread continuation** — detect an existing Threads post and append to it when continuing a thread on X
 - [ ] **Cleanup deprecated config** — Delete `public/selectors.json` once `v1.2.6` is fully approved by the Chrome Web Store (the live `v1.2.5` extension still relies on it).
 - [ ] **Resilient Retries** — Track cross-post status for each platform. If X posts but Threads fails, show a "retry failed only" option to prevent accidental double-posts on the platform that succeeded.
+- [x] **Progress Indicators** — Show a progress bar for each post going out, similar to the UI.
 - [x] **Clickable post link** — Add a clickable link in the popup for the post that was just yeeted, allowing one-click navigation to the destination post on either platform.
 - [ ] **Fix @ mentions stripping** — Threads intent auto-post strips the @ symbol from mentions because the post button is clicked before Lexical finishes parsing it. Needs a robust fix that doesn't involve arbitrary timeouts.
 - [ ] **Emoji encoding** — Emojis (e.g., 👀) are sometimes corrupted into when cross-posting to Threads. Likely an issue with URL encoding/decoding or Lexical editor parsing.

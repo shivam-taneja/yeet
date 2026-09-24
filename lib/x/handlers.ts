@@ -1,11 +1,10 @@
 import { browser } from "wxt/browser";
-import type { FALLBACK_SELECTORS } from "@/lib/constants";
+import type { SelectorsConfig } from "@/types/selectors";
 import { doYeet } from "@/lib/x/yeet";
+import { YeetProgressStatus } from "@/types/settings";
+import { BackgroundAction } from "@/types/messaging";
 
-export function handleXPostClick(
-  e: Event,
-  selectors: typeof FALLBACK_SELECTORS,
-): void {
+export function handleXPostClick(e: Event, selectors: SelectorsConfig): void {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("yeet_auto_post")) return;
 
@@ -18,7 +17,7 @@ export function handleXPostClick(
 
 export function handleXPostKeydown(
   e: KeyboardEvent,
-  selectors: typeof FALLBACK_SELECTORS,
+  selectors: SelectorsConfig,
 ): void {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("yeet_auto_post")) return;
@@ -41,7 +40,7 @@ export function handleXPostKeydown(
 }
 
 export async function handleXAutoPost(
-  selectors: typeof FALLBACK_SELECTORS,
+  selectors: SelectorsConfig,
 ): Promise<void> {
   const urlParams = new URLSearchParams(window.location.search);
   if (!urlParams.get("yeet_auto_post")) return;
@@ -64,7 +63,10 @@ export async function handleXAutoPost(
 
       setTimeout(() => {
         console.log("[Yeet] Closing tab.");
-        browser.runtime.sendMessage({ action: "closeTab" });
+        browser.storage.local.set({
+          yeetProgress: { status: YeetProgressStatus.DONE },
+        });
+        browser.runtime.sendMessage({ action: BackgroundAction.CLOSE_TAB });
       }, 3000);
     }
   });

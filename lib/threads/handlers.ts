@@ -1,11 +1,10 @@
 import { browser } from "wxt/browser";
-import type { FALLBACK_SELECTORS } from "@/lib/constants";
+import type { SelectorsConfig } from "@/types/selectors";
 import { doYeetToX } from "./yeet";
+import { YeetProgressStatus } from "@/types/settings";
+import { BackgroundAction } from "@/types/messaging";
 
-export function handleThreadsPostClick(
-  e: Event,
-  selectors: typeof FALLBACK_SELECTORS,
-) {
+export function handleThreadsPostClick(e: Event, selectors: SelectorsConfig) {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("yeet_auto_post")) return;
 
@@ -24,7 +23,7 @@ export function handleThreadsPostClick(
 
 export function handleThreadsPostKeydown(
   e: KeyboardEvent,
-  selectors: typeof FALLBACK_SELECTORS,
+  selectors: SelectorsConfig,
 ) {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("yeet_auto_post")) return;
@@ -46,9 +45,7 @@ export function handleThreadsPostKeydown(
   }
 }
 
-export async function handleThreadsAutoPost(
-  selectors: typeof FALLBACK_SELECTORS,
-) {
+export async function handleThreadsAutoPost(selectors: SelectorsConfig) {
   const urlParams = new URLSearchParams(window.location.search);
   if (!urlParams.get("yeet_auto_post")) return;
 
@@ -82,10 +79,15 @@ export async function handleThreadsAutoPost(
             if (res.lastYeet) {
               browser.storage.local.set({
                 lastYeet: { ...res.lastYeet, postUrl: event.data.permalink },
+                yeetProgress: { status: YeetProgressStatus.DONE },
+              });
+            } else {
+              browser.storage.local.set({
+                yeetProgress: { status: YeetProgressStatus.DONE },
               });
             }
             console.log("[Yeet] Closing tab.");
-            browser.runtime.sendMessage({ action: "closeTab" });
+            browser.runtime.sendMessage({ action: BackgroundAction.CLOSE_TAB });
           });
         }
       };
@@ -96,7 +98,7 @@ export async function handleThreadsAutoPost(
       const fallbackTimer = setTimeout(() => {
         window.removeEventListener("message", messageListener);
         console.log("[Yeet] Closing tab (fallback timeout).");
-        browser.runtime.sendMessage({ action: "closeTab" });
+        browser.runtime.sendMessage({ action: BackgroundAction.CLOSE_TAB });
       }, 5000);
     }
   });

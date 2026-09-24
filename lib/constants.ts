@@ -1,12 +1,9 @@
 import localSelectors from "./selectors.json";
+import type { SelectorsConfig } from "@/types/selectors";
 
-export const FALLBACK_SELECTORS = localSelectors as {
-  features: { xToThreads: boolean; threadsToX: boolean };
-  x: { composer: string; postButtons: string; intentPostButton: string };
-  threads: { composer: string; postButton: string };
-};
+export const FALLBACK_SELECTORS = localSelectors as SelectorsConfig;
 
-export function mergeSelectors(remote: any): typeof FALLBACK_SELECTORS {
+export function mergeSelectors(remote: any): SelectorsConfig {
   if (!remote) return FALLBACK_SELECTORS;
   return {
     ...FALLBACK_SELECTORS,

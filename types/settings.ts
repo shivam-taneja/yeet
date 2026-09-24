@@ -9,6 +9,13 @@ export type XContext =
 // ComposerContext = XContext + the unrecognised fallback
 export type ComposerContext = XContext | "unknown";
 
+export enum YeetProgressStatus {
+  IDLE = "idle",
+  YEETING = "yeeting",
+  DONE = "done",
+  ERROR = "error",
+}
+
 export interface AppSettings {
   copyImages: boolean;
   isActive: boolean;
@@ -20,5 +27,8 @@ export interface AppSettings {
     timestamp: number;
     platform: "X" | "Threads";
     postUrl?: string;
+  } | null;
+  yeetProgress?: {
+    status: YeetProgressStatus;
   } | null;
 }

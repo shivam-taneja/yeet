@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { browser } from "wxt/browser";
 import type { AppSettings } from "@/types/settings";
+import { YeetProgressStatus } from "@/types/settings";
 
 const defaultSettings: AppSettings = {
   copyImages: true,
@@ -21,6 +22,7 @@ const defaultSettings: AppSettings = {
   },
   lastSavedAt: null,
   lastYeet: null,
+  yeetProgress: { status: YeetProgressStatus.IDLE },
 };
 
 export function useSettings() {
@@ -54,6 +56,10 @@ export function useSettings() {
           result.lastYeet !== undefined
             ? (result.lastYeet as typeof defaultSettings.lastYeet)
             : defaultSettings.lastYeet,
+        yeetProgress:
+          result.yeetProgress !== undefined
+            ? (result.yeetProgress as typeof defaultSettings.yeetProgress)
+            : defaultSettings.yeetProgress,
       }));
       setIsLoading(false);
     });
