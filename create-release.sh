@@ -15,6 +15,9 @@ if ! git rev-parse "$TAG" >/dev/null 2>&1; then
   exit 1
 fi
 
+echo "Pushing tag to origin to ensure GitHub CLI can see it..."
+git push origin "$TAG"
+
 echo "Opening GitHub CLI interactive release creator..."
 # Launch the interactive gh CLI tool
 gh release create "$TAG" --title "Yeet $TAG"
