@@ -37,8 +37,9 @@ Check out the [TODO.md](./TODO.md) file for the full list of planned features, i
 │   └── x.content.ts         # Content script specifically for intercepting X
 ├── hooks/                   # Shared React hooks (e.g., use-settings.ts)
 ├── lib/                     # Core business logic and shared utilities
-│   ├── constants.ts         # Centralized DOM selectors for X and Threads
-│   └── dom-utils.ts         # Utility functions for DOM text extraction
+│   ├── constants.ts         # Imports and exports fallback UI selectors
+│   ├── dom-utils.ts         # Utility functions for DOM text extraction
+│   └── selectors.json       # Single source of truth for OTA UI selectors
 └── types/                   # TypeScript type definitions
 ```
 
@@ -131,9 +132,8 @@ Contributions are welcome! If you'd like to help improve Yeet, please follow the
 When updating logic related to X or Threads DOM elements, **do not** hardcode them in the content scripts.
 Instead, Yeet uses an **Over-The-Air (OTA) update system** for UI selectors. If a platform changes its UI (e.g., modifying a button's class name):
 
-1. Update `public/selectors.json` with the new DOM selector.
-2. Update the fallback values in `lib/constants.ts`.
-3. Push to the `main` branch.
+1. Update `lib/selectors.json` with the new DOM selector (or feature flags).
+2. Push to the `main` branch. (`lib/constants.ts` imports this file directly, so there's no need to update fallbacks manually).
    The extension automatically fetches the latest JSON payload from the raw GitHub URL in the background, fixing broken selectors for all users instantly without requiring a Web Store update!
 
 ## License

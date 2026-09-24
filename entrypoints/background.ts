@@ -4,9 +4,16 @@ export default defineBackground(() => {
   console.log("[Yeet] Background service worker registered.");
 
   const SELECTORS_URL =
-    "https://raw.githubusercontent.com/shivam-taneja/yeet/main/public/selectors.json";
+    "https://raw.githubusercontent.com/shivam-taneja/yeet/main/lib/selectors.json";
 
   async function fetchLatestSelectors() {
+    if (import.meta.env.DEV) {
+      console.log(
+        "[Yeet] Dev mode: Skipping OTA fetch, local JSON is bundled directly.",
+      );
+      return;
+    }
+
     try {
       const res = await fetch(SELECTORS_URL);
       if (res.ok) {

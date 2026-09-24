@@ -1,5 +1,5 @@
 import { browser } from "wxt/browser";
-import { FALLBACK_SELECTORS } from "@/lib/constants";
+import { FALLBACK_SELECTORS, mergeSelectors } from "@/lib/constants";
 import { observeAndTagComposers } from "@/lib/x/context";
 import {
   handleXPostClick,
@@ -15,7 +15,7 @@ export default defineContentScript({
     let SELECTORS = FALLBACK_SELECTORS;
     browser.storage.local.get(["selectors"]).then((res) => {
       if (res.selectors) {
-        SELECTORS = res.selectors as typeof FALLBACK_SELECTORS;
+        SELECTORS = mergeSelectors(res.selectors);
       }
     });
 
@@ -23,12 +23,20 @@ export default defineContentScript({
 
     document.addEventListener(
       "click",
-      (e) => handleXPostClick(e, SELECTORS),
+      (e) => {
+        if (SELECTORS.features.xToThreads !== false) {
+          handleXPostClick(e, SELECTORS);
+        }
+      },
       true,
     );
     document.addEventListener(
       "keydown",
-      (e) => handleXPostKeydown(e, SELECTORS),
+      (e) => {
+        if (SELECTORS.features.xToThreads !== false) {
+          handleXPostKeydown(e, SELECTORS);
+        }
+      },
       true,
     );
     handleXAutoPost(SELECTORS);

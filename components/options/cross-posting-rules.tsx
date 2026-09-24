@@ -1,15 +1,39 @@
+import { useState, useEffect } from "react";
+import { browser } from "wxt/browser";
 import { useSettings } from "@/hooks/use-settings";
 import type { XContext } from "@/types/settings";
 import { MatrixSettingRow } from "@/components/shared/matrix-setting-row";
+import { FALLBACK_SELECTORS, mergeSelectors } from "@/lib/constants";
 
 export function CrossPostingRules() {
   const { settings, updateSettings } = useSettings();
+  const [selectors, setSelectors] = useState(FALLBACK_SELECTORS);
+
+  useEffect(() => {
+    browser.storage.local.get(["selectors"]).then((res) => {
+      if (res.selectors) {
+        setSelectors(mergeSelectors(res.selectors));
+      }
+    });
+  }, []);
 
   const handleXContext = (key: XContext) => {
     updateSettings({
       xContexts: { ...settings.xContexts, [key]: !settings.xContexts[key] },
     });
   };
+
+  const handleThreadsContext = (key: keyof typeof settings.threadsContexts) => {
+    updateSettings({
+      threadsContexts: {
+        ...settings.threadsContexts,
+        [key]: !settings.threadsContexts[key],
+      },
+    });
+  };
+
+  const isThreadsLocked = selectors.features.threadsToX !== true;
+  const isXLocked = selectors.features.xToThreads === false;
 
   return (
     <div className="w-full overflow-hidden rounded-[24px] border-2 border-ink bg-white shadow-[8px_8px_0_var(--color-ink)] p-8 relative mb-6">
@@ -39,34 +63,46 @@ export function CrossPostingRules() {
         <MatrixSettingRow
           label="Mention Posts"
           description="When composing from a profile page. Note: their @handle may differ on the destination platform."
-          xChecked={settings.xContexts["mention-post"]}
+          xChecked={isXLocked ? false : settings.xContexts["mention-post"]}
           onXChange={() => handleXContext("mention-post")}
-          threadsChecked={false}
-          onThreadsChange={() => {}}
-          threadsLocked
-          threadsComingSoon
+          xLocked={isXLocked}
+          xComingSoon={isXLocked}
+          threadsChecked={
+            isThreadsLocked ? false : settings.threadsContexts["mention-post"]
+          }
+          onThreadsChange={() => handleThreadsContext("mention-post")}
+          threadsLocked={isThreadsLocked}
+          threadsComingSoon={isThreadsLocked}
         />
 
         <MatrixSettingRow
           label="Quote Posts"
           description="When you quote someone's post. Cross-posts your comment text only."
-          xChecked={settings.xContexts["quote"]}
+          xChecked={isXLocked ? false : settings.xContexts["quote"]}
           onXChange={() => handleXContext("quote")}
-          threadsChecked={false}
-          onThreadsChange={() => {}}
-          threadsLocked
-          threadsComingSoon
+          xLocked={isXLocked}
+          xComingSoon={isXLocked}
+          threadsChecked={
+            isThreadsLocked ? false : settings.threadsContexts["quote"]
+          }
+          onThreadsChange={() => handleThreadsContext("quote")}
+          threadsLocked={isThreadsLocked}
+          threadsComingSoon={isThreadsLocked}
         />
 
         <MatrixSettingRow
           label="Replies"
           description="When you reply to a post. Not recommended — replies often lack context when yeeted."
-          xChecked={settings.xContexts["reply"]}
+          xChecked={isXLocked ? false : settings.xContexts["reply"]}
           onXChange={() => handleXContext("reply")}
-          threadsChecked={false}
-          onThreadsChange={() => {}}
-          threadsLocked
-          threadsComingSoon
+          xLocked={isXLocked}
+          xComingSoon={isXLocked}
+          threadsChecked={
+            isThreadsLocked ? false : settings.threadsContexts["reply"]
+          }
+          onThreadsChange={() => handleThreadsContext("reply")}
+          threadsLocked={isThreadsLocked}
+          threadsComingSoon={isThreadsLocked}
         />
 
         <MatrixSettingRow
