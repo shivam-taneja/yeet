@@ -17,4 +17,4 @@ fi
 
 echo "Opening GitHub CLI interactive release creator..."
 # Launch the interactive gh CLI tool
-gh release create "$TAG"
+gh release create "$TAG" --title "Yeet $TAG"
