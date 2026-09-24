@@ -12,15 +12,22 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-cream font-body text-ink flex flex-col items-center py-12 px-4 md:px-8 selection:bg-mint/30">
-      <div className="w-full max-w-4xl">
+      <div className="w-full max-w-5xl">
         <Header />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start mb-6">
-          <PreferencesCard />
-          <SupportCard />
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch mb-6">
+          <div className="md:col-start-2 md:row-start-1">
+            <PreferencesCard />
+          </div>
 
-        <CrossPostingRules />
+          <div className="md:col-start-1 md:row-start-1 md:row-span-2 h-full">
+            <CrossPostingRules />
+          </div>
+
+          <div className="md:col-start-2 md:row-start-2 h-full">
+            <SupportCard />
+          </div>
+        </div>
 
         <Footer />
       </div>

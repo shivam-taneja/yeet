@@ -18,6 +18,8 @@ export enum YeetProgressStatus {
 
 export interface AppSettings {
   copyImages: boolean;
+  copyVideos: boolean;
+  copyGifs: boolean;
   isActive: boolean;
   xContexts: Record<XContext, boolean>;
   threadsContexts: Record<XContext, boolean>;

@@ -2,32 +2,38 @@ import { browser } from "wxt/browser";
 
 export function SupportCard() {
   return (
-    <div className="w-full overflow-hidden rounded-[24px] border-2 border-ink bg-butter shadow-[8px_8px_0_var(--color-ink)] p-8 relative">
-      <h2 className="text-xl font-bold font-display border-b-2 border-ink/20 pb-4 mb-6 text-ink flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-mint inline-block"></span>
-        Support the Creator
-      </h2>
-      <div className="flex flex-col gap-4">
-        <p className="text-sm font-semibold text-ink/80">
-          Building Yeet takes time. If this extension saves you time, consider
-          buying me a coffee to keep it alive!
-        </p>
+    <div className="w-full h-full overflow-hidden rounded-[24px] border-2 border-ink bg-butter shadow-[8px_8px_0_var(--color-ink)] relative group transition-transform hover:-translate-y-1 hover:shadow-[12px_12px_0_var(--color-ink)] duration-300">
+      {/* Decorative Brutalist Shapes */}
+      <div className="absolute -right-8 -top-8 w-32 h-32 bg-coral rounded-full border-2 border-ink opacity-30 group-hover:scale-110 transition-transform duration-500"></div>
+      <div className="absolute right-32 -bottom-12 w-24 h-24 bg-mint rotate-12 border-2 border-ink opacity-30 group-hover:-rotate-12 transition-transform duration-500"></div>
+
+      <div className="p-6 md:p-8 relative z-10 flex flex-col items-start justify-between gap-6 h-full">
+        <div className="flex-1 w-full">
+          <h2 className="text-xl md:text-2xl font-black font-display text-ink flex items-center gap-3 mb-2">
+            <span className="text-2xl md:text-3xl">☕️</span>
+            Fuel the Dev!
+          </h2>
+          <p className="text-sm md:text-base font-bold text-ink/75 leading-relaxed">
+            Yeet is built with blood, sweat, and caffeine. If it saves you
+            hours, a coffee goes a long way!
+          </p>
+        </div>
         <button
           onClick={() =>
             browser.tabs.create({
               url: "https://buymeacoffee.com/codesbyshivam",
             })
           }
-          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-ink bg-cream font-bold text-ink shadow-[4px_4px_0_var(--color-ink)] transition-transform hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--color-ink)] active:translate-y-1 active:shadow-[0px_0px_0_var(--color-ink)] cursor-pointer"
+          className="inline-flex h-14 w-full md:w-auto px-8 items-center justify-center gap-3 rounded-xl border-2 border-ink bg-white font-black text-lg text-ink shadow-[4px_4px_0_var(--color-ink)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[8px_8px_0_var(--color-ink)] hover:bg-mint active:translate-y-1 active:shadow-[0px_0px_0_var(--color-ink)] cursor-pointer whitespace-nowrap"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
+            width="24"
+            height="24"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           >
