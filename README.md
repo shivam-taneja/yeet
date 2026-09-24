@@ -16,6 +16,7 @@ https://github.com/user-attachments/assets/1b7b4be9-996c-411b-a182-0f14d98a52e6
 - Cross-post from Threads to X automatically. (Temporarily disabled due to Threads DOM changes, coming soon!)
 - Supports standard mouse clicks and Cmd/Ctrl + Enter shortcuts.
 - Gracefully handles character limits (e.g., 280 for X, 500 for Threads).
+- Real-time progress indicators when yeeting posts.
 - Clickable post link in the popup to instantly view your newly yeeted post.
 - Settings toggle to easily turn the extension on and off.
 
@@ -37,6 +38,8 @@ Check out the [TODO.md](./TODO.md) file for the full list of planned features, i
 │   └── x.content.ts         # Content script specifically for intercepting X
 ├── hooks/                   # Shared React hooks (e.g., use-settings.ts)
 ├── lib/                     # Core business logic and shared utilities
+│   ├── threads/             # Threads-specific DOM handlers and yeeting logic
+│   ├── x/                   # X-specific DOM handlers and yeeting logic
 │   ├── constants.ts         # Imports and exports fallback UI selectors
 │   ├── dom-utils.ts         # Utility functions for DOM text extraction
 │   └── selectors.json       # Single source of truth for OTA UI selectors
