@@ -1,4 +1,5 @@
 import { browser } from "wxt/browser";
+import { savePendingMedia } from "@/lib/media-storage";
 import { extractTextFromDraftEditor } from "@/lib/dom-utils";
 import type { AppSettings } from "@/types/settings";
 import { YeetProgressStatus } from "@/types/settings";
@@ -10,7 +11,11 @@ export async function doYeet(
   e: Event | null,
   selectors: SelectorsConfig,
 ): Promise<void> {
-  const storage = await browser.storage.local.get(["isActive", "xContexts"]);
+  const storage = await browser.storage.local.get([
+    "isActive",
+    "xContexts",
+    "copyImages",
+  ]);
   if (storage.isActive === false) return;
 
   let editorElement: Element | null = null;
@@ -35,12 +40,7 @@ export async function doYeet(
     return;
   }
 
-  const text = extractTextFromDraftEditor(editorElement);
-
-  if (!text) {
-    console.log("[Yeet] No text found to cross-post.");
-    return;
-  }
+  const text = extractTextFromDraftEditor(editorElement) || "";
 
   if (text.length > 500) {
     alert(
@@ -49,7 +49,69 @@ export async function doYeet(
     return;
   }
 
-  console.log("[Yeet] Extracted text:", text);
+  // --- IMAGE EXTRACTION LOGIC ---
+  let hasMedia = false;
+  if (storage.copyImages !== false) {
+    const container = editorElement?.closest('[role="dialog"]') || document;
+    const attachmentImages = Array.from(
+      container.querySelectorAll('[data-testid="attachments"] img'),
+    ) as HTMLImageElement[];
+
+    // Warn if there are videos/gifs attached (not supported yet)
+    const hasUnsupported =
+      container.querySelectorAll(
+        '[data-testid="attachments"] video, [data-testid="attachments"] [data-testid="gif"]',
+      ).length > 0;
+
+    if (hasUnsupported) {
+      alert(
+        "Yeet: Videos and GIFs aren't supported yet — only images will be copied to Threads.",
+      );
+    }
+
+    if (attachmentImages.length > 0) {
+      console.log(`[Yeet] Found ${attachmentImages.length} attached images!`);
+      const files: File[] = [];
+
+      for (let i = 0; i < attachmentImages.length; i++) {
+        const img = attachmentImages[i];
+        if (!img) continue;
+
+        if (img.src && img.src.startsWith("blob:")) {
+          try {
+            const res = await fetch(img.src);
+            const blob = await res.blob();
+
+            if (!blob.type.startsWith("image/")) {
+              console.warn(`[Yeet] Skipping non-image blob: ${blob.type}`);
+              continue;
+            }
+
+            const ext = blob.type.split("/")[1] || "jpg";
+            files.push(
+              new File([blob], `yeet_image_${i}.${ext}`, { type: blob.type }),
+            );
+          } catch (err) {
+            console.error("[Yeet] Failed to fetch blob image:", err);
+          }
+        }
+      }
+
+      if (files.length > 0) {
+        await savePendingMedia(files);
+        console.log("[Yeet] Successfully saved images to storage.");
+        hasMedia = true;
+      }
+    }
+  }
+  // ------------------------------
+
+  if (!text && !hasMedia) {
+    console.log("[Yeet] No text or media found to cross-post.");
+    return;
+  }
+
+  console.log("[Yeet] Extracted text:", text, "| Has Media:", hasMedia);
   const encodedText = encodeURIComponent(text);
   const url = `https://www.threads.com/intent/post?text=${encodedText}&yeet_auto_post=true`;
 
@@ -73,5 +135,6 @@ export async function doYeet(
   browser.runtime.sendMessage({
     action: BackgroundAction.OPEN_BACKGROUND_TAB,
     url,
+    hasMedia,
   });
 }

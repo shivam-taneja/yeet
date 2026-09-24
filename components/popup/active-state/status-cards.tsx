@@ -115,7 +115,9 @@ export function ActiveStateStatusCards({
                 Last yeet landed on {settings.lastYeet.platform}
               </p>
               <p className="mt-1 truncate text-xs font-semibold text-ink/70">
-                "{settings.lastYeet.text}"
+                {settings.lastYeet.text
+                  ? `"${settings.lastYeet.text}"`
+                  : "📷 Image post"}
               </p>
             </div>
             {settings.lastYeet.postUrl && (

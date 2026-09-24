@@ -41,13 +41,20 @@ export default defineBackground(() => {
       // Chrome throttles background tabs, so X intent URLs must be active
       const isXIntent =
         message.url.includes("x.com") || message.url.includes("twitter.com");
-      browser.tabs.create({ url: message.url, active: isXIntent });
+      const needsFocus = isXIntent || message.hasMedia === true;
+      browser.tabs.create({ url: message.url, active: needsFocus });
     }
 
     if (message.action === BackgroundAction.CLOSE_TAB) {
       if (sender.tab?.id) {
         console.log("[Yeet] Closing tab:", sender.tab.id);
         browser.tabs.remove(sender.tab.id);
+      }
+    }
+
+    if (message.action === BackgroundAction.FOCUS_TAB) {
+      if (sender.tab?.id) {
+        browser.tabs.update(sender.tab.id, { active: true });
       }
     }
   });

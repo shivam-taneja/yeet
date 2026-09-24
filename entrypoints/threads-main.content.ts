@@ -1,8 +1,34 @@
 export default defineContentScript({
   matches: ["*://*.threads.com/*", "*://*.threads.net/*"],
   world: "MAIN",
+  runAt: "document_start",
   main() {
-    // Intercept Fetch requests to grab the Threads post URL from the API response
+    console.log("[Yeet] MAIN world script active — fetch patched.");
+    function extractPermalink(data: any): string | null {
+      return (
+        data?.media?.permalink ||
+        data?.items?.[0]?.media?.permalink ||
+        data?.permalink ||
+        null
+      );
+    }
+
+    function isPostEndpoint(url: string): boolean {
+      return (
+        url.includes("/api/v1/media/configure_text_only_post/") ||
+        url.includes("/api/v1/media/configure_text_post_app_feed/")
+      );
+    }
+
+    function tryEmit(data: any) {
+      const permalink = extractPermalink(data);
+      if (permalink) {
+        console.log("[Yeet] Main world intercepted post URL:", permalink);
+        window.postMessage({ type: "YEET_POST_SUCCESS", permalink }, "*");
+      }
+    }
+
+    // Intercept Fetch
     const originalFetch = window.fetch;
     window.fetch = async function (...args) {
       const response = await originalFetch.apply(this, args);
@@ -12,26 +38,13 @@ export default defineContentScript({
             ? args[0]
             : (args[0] as Request | undefined)?.url;
 
-        if (url && url.includes("/api/v1/media/configure_text_only_post/")) {
+        if (url && isPostEndpoint(url)) {
+          console.log("[Yeet] Matched post endpoint:", url);
           response
             .clone()
             .json()
-            .then((data) => {
-              if (data?.media?.permalink) {
-                console.log(
-                  "[Yeet] Main world intercepted post URL:",
-                  data.media.permalink,
-                );
-                window.postMessage(
-                  {
-                    type: "YEET_POST_SUCCESS",
-                    permalink: data.media.permalink,
-                  },
-                  "*",
-                );
-              }
-            })
-            .catch((e) => console.error("[Yeet] Failed to parse response", e));
+            .then(tryEmit)
+            .catch(() => {});
         }
       } catch (e) {
         // ignore
@@ -39,7 +52,7 @@ export default defineContentScript({
       return response;
     };
 
-    // Also intercept XMLHttpRequest just in case Threads falls back to it
+    // Intercept XHR fallback
     const originalOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (
       method: string,
@@ -47,25 +60,9 @@ export default defineContentScript({
       ...rest: any[]
     ) {
       this.addEventListener("load", function () {
-        if (
-          typeof url === "string" &&
-          url.includes("/api/v1/media/configure_text_only_post/")
-        ) {
+        if (typeof url === "string" && isPostEndpoint(url)) {
           try {
-            const data = JSON.parse(this.responseText);
-            if (data?.media?.permalink) {
-              console.log(
-                "[Yeet] Main world XHR intercepted post URL:",
-                data.media.permalink,
-              );
-              window.postMessage(
-                {
-                  type: "YEET_POST_SUCCESS",
-                  permalink: data.media.permalink,
-                },
-                "*",
-              );
-            }
+            tryEmit(JSON.parse(this.responseText));
           } catch (e) {
             // ignore
           }

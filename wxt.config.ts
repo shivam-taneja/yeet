@@ -20,7 +20,7 @@ export default defineConfig({
     disabled: true,
   },
   manifest: {
-    permissions: ["activeTab", "storage", "cookies"],
+    permissions: ["activeTab", "storage", "unlimitedStorage", "cookies"],
     host_permissions: [
       "*://*.x.com/*",
       "*://x.com/*",
