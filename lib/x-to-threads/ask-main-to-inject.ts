@@ -4,8 +4,8 @@ import {
 } from "@/lib/x-to-threads/messages";
 
 /**
- * Ask the MAIN-world script to inject text via Lexical setEditorState.
- * (Isolated world cannot drive Lexical reliably.)
+ * Ask MAIN to inject text via Lexical setEditorState.
+ * Isolated-world paste/execCommand cannot drive Lexical.
  */
 export function askMainWorldToInject(
   text: string,

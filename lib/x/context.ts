@@ -22,7 +22,6 @@ export function observeAndTagComposers() {
 
       let ctx = "unknown";
 
-      // 1. Try to find the placeholder
       const placeholder = wrapper.querySelector(
         ".public-DraftEditorPlaceholder-inner",
       );
@@ -34,8 +33,6 @@ export function observeAndTagComposers() {
         else if (/comment/i.test(text)) ctx = "quote";
         else if (/another post/i.test(text)) ctx = "thread";
       } else {
-        // 2. If no placeholder exists, it might be pre-filled (like a mention post).
-        // Draft.js editor contents are nested inside the textbox.
         const text = textbox.textContent?.trim() || "";
         if (text.startsWith("@")) {
           ctx = "mention-post";

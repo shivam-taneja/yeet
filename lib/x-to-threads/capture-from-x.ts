@@ -7,13 +7,11 @@ import { getComposerContext, defaultXContexts } from "@/lib/x/context";
 import type { SelectorsConfig } from "@/types/selectors";
 import { BackgroundAction } from "@/types/messaging";
 
-/** Blank Threads composer — text comes from storage, not the URL. */
+/** Blank Threads intent — body text comes from storage, not the URL. */
 export const THREADS_AUTO_POST_URL =
   "https://www.threads.com/intent/post?yeet_auto_post=true";
 
-/**
- * Step 1 — On X: capture composer text, stash it, open Threads in the background.
- */
+/** On X: capture composer text, stash it, open Threads in the background. */
 export async function captureFromX(
   e: Event | null,
   selectors: SelectorsConfig,
@@ -72,7 +70,7 @@ export async function captureFromX(
 
   if (import.meta.env.VITE_DEV_MODE === "true") {
     console.log(
-      "[Yeet] 🛠️ DEV MODE — skipping Threads tab. Pending text saved; would open:",
+      "[Yeet] DEV MODE — skipping Threads tab. Pending text saved; would open:",
       THREADS_AUTO_POST_URL,
     );
     return;

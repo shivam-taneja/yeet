@@ -1,27 +1,46 @@
 # Yeet Roadmap & TODOs
 
+## Current status (X → Threads)
+
+- [x] **Text cross-post** — Capture from X → storage → Lexical `setEditorState` on Threads → Post → intercept permalink/postId → close tab (`lib/x-to-threads/`)
+- [x] **Background tab for text-only** — Threads intent opens inactive
+- [x] **Progress indicators + last-yeet link** — Popup shows yeeting / done + post URL
+- [x] **X composer contexts** — new-post / mention / quote / reply toggles in options
+
 ## Features in Pipeline
 
 ### Media & Attachments
 
-- [ ] **Images** — yeet attached photos from the X composer to Threads, and the other way
-- [ ] **Videos** — same for video / GIF attachments
-- [ ] **Fix OG link unfurls** — When yeeting a link (e.g., domain.com), X instantly renders the OG image, but Threads requires time to fetch it. _(Known limitation: Chrome pauses rendering on background tabs, so if Yeet opens Threads in the background, Lexical will literally never fetch the OG preview until the tab is focused. We've opted to just post instantly without the preview to maintain background speed.)_
+- [ ] **Images (X → Threads)** — In progress / blocked. Learnings from the last attempt:
+  - `/rupload_igphoto/` returning `ok` ≠ image attached to the draft (can still hit `configure_text_only_post`)
+  - Background tabs often drop the media preview; focused tab is more reliable
+  - Lexical `setEditorState` after attach can wipe media — order must be text then images (or never reset Lexical after media)
+  - File-input `change` alone is unreliable; manual clipboard paste works — revisit MAIN-world paste/drop
+  - Never encode image bytes with `btoa(String.fromCharCode(...hugeUint8))` (stack overflow) — use chunked base64
+  - Need draft-level truth before Post (e.g. preview in DOM and/or `configure_text_post_app_feed`)
+- [ ] **Videos / GIFs** — After images are stable
+- [ ] **OG link unfurls** — Threads may not fetch OG in a background tab; posting without waiting on preview is OK for now
 
 ### Core Functionality
 
-- [ ] **Thread continuation** — detect an existing Threads post and append to it when continuing a thread on X
-- [ ] **Resilient Retries** — Track cross-post status for each platform. If X posts but Threads fails, show a "retry failed only" option to prevent accidental double-posts on the platform that succeeded.
-- [x] **Progress Indicators** — Show a progress bar for each post going out, similar to the UI.
-- [x] **Clickable post link** — Add a clickable link in the popup for the post that was just yeeted, allowing one-click navigation to the destination post on either platform.
-- [x] **Threads Context & Constraints** — Implement robust context detection (new post, reply, quote, etc.) and state checks for Threads, matching the robustness of the logic built for X.
+- [ ] **Threads → X** — Removed from the codebase (was OTA-gated / broken). Rebuild later using Lexical-first approach similar to X → Threads, not fragile DOM scraping
+- [ ] **Thread continuation** — Detect an existing Threads post and append when continuing a thread on X
+- [ ] **Resilient retries** — If X succeeds but Threads fails, offer “retry Threads only” without double-posting X
 
 ### Bugs & Limitations
 
-- [ ] **Threads → X cross-posting** (blocked) — The click/keydown interception is unreliable. Threads' heavily obfuscated DOM makes it hard to consistently find the active composer when the Post button is clicked inside modals. Root causes: (1) context is "unknown" for button clicks because the MutationObserver tags editors asynchronously and loses the race; (2) when multiple composers exist in the DOM (modal + background feed), picking the right one by text content is flaky. Needs a fundamentally different approach — likely hooking into Lexical's internal state instead of reading from the DOM. Re-enable `handleThreadsPostClick`, `handleThreadsPostKeydown`, and `observeAndTagThreadsComposers` in `entrypoints/threads.content.ts` once resolved.
-- [ ] **Fix @ mentions stripping** — Threads intent auto-post strips the @ symbol from mentions because the post button is clicked before Lexical finishes parsing it. Needs a robust fix that doesn't involve arbitrary timeouts.
-- [ ] **Emoji encoding** — Emojis (e.g., 👀) are sometimes corrupted into when cross-posting to Threads. Likely an issue with URL encoding/decoding or Lexical editor parsing.
+- [ ] **Verify @ mentions** — Old URL-intent path stripped `@` if Post fired too early; Lexical inject may have fixed this — re-test
+- [ ] **Verify emoji** — Old URL encoding could corrupt emoji; re-test on Lexical path
+- [ ] **Composer flash / remount** — Intent page sometimes mounts a throwaway composer then replaces it; ready-gate (live Lexical editor + stable node) still worth hardening when media returns
 
 ### Tech Debt & Cleanup
 
-- [ ] **Cleanup deprecated config** — Delete `public/selectors.json` once `v1.2.6` is fully approved by the Chrome Web Store (the live `v1.2.5` extension still relies on it).
+- [ ] **Delete `public/selectors.json`** — Once older store builds that still fetch it are fully retired
+- [ ] **Preferences / clear stuck state** — Optional: clear pending yeet + reset `chrome.storage.local` from options (useful when debugging)
+
+## Done (recent)
+
+- [x] Modular `lib/x-to-threads/` flow (capture → inject → network watch → close)
+- [x] Drop URL `?text=` intent for body text (storage + Lexical instead)
+- [x] Strip Threads → X dead code and dual-column options matrix
+- [x] Progress UI + clickable last yeet link

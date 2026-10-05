@@ -1,6 +1,6 @@
 /**
- * Find Threads' live Lexical editor and set its state.
- * Synthetic paste/execCommand are ignored by Lexical — this is the real path.
+ * Drive Threads' Lexical editor via setEditorState.
+ * Synthetic paste / execCommand are ignored by Lexical.
  */
 
 function textMatches(live: string, expected: string): boolean {

@@ -6,8 +6,8 @@ export function PreferencesCard() {
         Preferences
       </h2>
       <p className="text-sm font-semibold text-ink/60 leading-relaxed">
-        Right now Yeet only supports text from X → Threads. Media and Threads →
-        X will come back later.
+        Yeet currently supports text from X → Threads. Images, video, and
+        Threads → X are on the roadmap.
       </p>
     </div>
   );

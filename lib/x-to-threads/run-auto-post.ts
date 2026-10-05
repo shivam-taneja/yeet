@@ -40,8 +40,8 @@ async function injectWithOptionalFocusRetry(
 }
 
 /**
- * Step 2 — On Threads intent tab (`?yeet_auto_post=true`):
- * wait for composer → inject via MAIN/Lexical → click Post → await success.
+ * On Threads intent tab (`?yeet_auto_post=true`):
+ * wait for composer → MAIN Lexical inject → click Post → await success.
  */
 export async function runThreadsAutoPost(
   selectors: SelectorsConfig,

@@ -7,9 +7,7 @@ import {
 import { YeetProgressStatus } from "@/types/settings";
 import { BackgroundAction } from "@/types/messaging";
 
-/**
- * Step 5 — After Threads posts: save permalink/id, clear pending text, close tab.
- */
+/** After Threads posts: save permalink/id, clear pending text, close tab. */
 export function listenForPostSuccess(): void {
   const messageListener = (event: MessageEvent) => {
     if (event.source !== window) return;

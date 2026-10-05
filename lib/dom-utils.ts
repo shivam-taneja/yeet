@@ -5,9 +5,7 @@
 export function extractTextFromDraftEditor(container: Element | null): string {
   if (!container) return "";
 
-  const blocks = Array.from(
-    container.querySelectorAll('[data-block="true"]'),
-  );
+  const blocks = Array.from(container.querySelectorAll('[data-block="true"]'));
 
   return blocks
     .map((block) => {

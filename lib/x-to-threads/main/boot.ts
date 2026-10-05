@@ -31,9 +31,9 @@ function listenForInjectRequests(): void {
   });
 }
 
-/** MAIN-world bootstrap: Lexical inject listener + post API watcher. */
+/** MAIN-world bootstrap: Lexical inject + post API watcher. */
 export function installThreadsMainWorld(): void {
-  console.log("[Yeet] MAIN world ready (Lexical inject + post API watcher).");
+  console.log("[Yeet] MAIN world ready.");
   listenForInjectRequests();
   installPostApiWatcher();
 }

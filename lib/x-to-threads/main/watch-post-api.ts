@@ -36,9 +36,7 @@ function emitSuccess(data: any) {
   );
 }
 
-/**
- * Step 4 — Patch fetch/XHR so we learn the permalink + post id after Post.
- */
+/** Patch fetch/XHR to capture permalink + post id after Post. */
 export function installPostApiWatcher(): void {
   const originalFetch = window.fetch;
   window.fetch = async function (...args) {
