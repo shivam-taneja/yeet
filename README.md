@@ -12,41 +12,57 @@ https://github.com/user-attachments/assets/1b7b4be9-996c-411b-a182-0f14d98a52e6
 
 ## Features
 
-- Bidirectional text cross-posting (X ↔ Threads).
-- Supports standard mouse clicks and Cmd/Ctrl + Enter shortcuts.
-- Gracefully handles character limits (e.g., 280 for X, 500 for Threads).
-- Real-time progress indicators when yeeting posts.
-- Clickable post link in the popup to instantly view your newly yeeted post.
-- Settings toggle to easily turn the extension on and off.
+- Bidirectional **text** cross-posting (X ↔ Threads).
+- Works from popup composers, feed posts, and inline reply bars (Post click + Cmd/Ctrl + Enter).
+- Respects destination character limits (Threads 500; X 280 free / 25,000 Premium via sidebar detection).
+- Per-direction composer rules in Settings (new posts always on; mention / quote / reply toggles; thread continuation coming soon).
+- Real-time progress indicators when yeeting, plus a clickable last-yeet link in the popup.
+- Global pause/resume toggle and **Reset everything to default** in Settings.
+- Media copy toggles are visible but locked until image support ships.
 
 ## TODO / Roadmap
 
 Check out the [TODO.md](./TODO.md) file for the full list of planned features, including media support and resilient retries.
+
+## How it works (text)
+
+1. **Capture** on the source platform when you Post (or Cmd/Ctrl + Enter).
+2. **Stash** plain text in extension storage (nothing goes in the intent URL).
+3. Open a **background intent tab** on the destination (`?yeet_auto_post=true`).
+4. **MAIN-world inject** — Lexical `setEditorState` on Threads, Draft.js on X.
+5. Click Post, watch the create-post API for permalink/id, then close the tab.
+
+| Direction   | Capture           | Inject                   | Success watch                  |
+| ----------- | ----------------- | ------------------------ | ------------------------------ |
+| X → Threads | Draft.js composer | Lexical (`threads-main`) | Threads configure*text*\* APIs |
+| Threads → X | Lexical composer  | Draft.js (`x-main`)      | X `CreateTweet`                |
 
 ## Project Structure
 
 ```text
 .
 ├── assets/                  # Static assets like fonts, icons, and tailwind.css
-├── components/              # React components (Popup UI, Shared Components, UI Elements)
+├── components/              # React components (Popup UI, Options, Shared UI)
 ├── entrypoints/             # WXT Entrypoints
-│   ├── background.ts        # Background service worker handling tab management
-│   ├── options/             # Options page source files
-│   ├── popup/               # Popup page source files
-│   ├── threads.content.ts   # Threads isolated script (capture + X→Threads auto-post)
-│   ├── threads-main.content.ts  # Threads MAIN world (Lexical + fetch patch)
-│   ├── x.content.ts         # X isolated script (capture + Threads→X auto-post)
-│   └── x-main.content.ts    # X MAIN world (Draft inject + CreateTweet watch)
-├── hooks/                   # Shared React hooks (e.g., use-settings.ts)
-├── lib/                     # Core business logic and shared utilities
-│   ├── cross-post/          # Shared pending text, messages, MAIN inject bridge
-│   ├── threads-to-x/        # Threads → X capture, Draft inject, network watch
-│   ├── x-to-threads/        # X → Threads capture, Lexical inject, network watch
-│   ├── threads/             # Threads capture handlers + composer context
-│   ├── x/                   # X capture handlers + composer context
-│   ├── constants.ts         # Imports and exports fallback UI selectors
-│   ├── dom-utils.ts         # DOM text extraction helpers
-│   └── selectors.json       # Single source of truth for OTA UI selectors
+│   ├── background.ts        # Background service worker (tabs + OTA selectors)
+│   ├── options/             # Options page
+│   ├── popup/               # Popup page
+│   ├── threads.content.ts   # Threads isolated (capture + run X→Threads auto-post)
+│   ├── threads-main.content.ts  # Threads MAIN (Lexical inject + fetch patch)
+│   ├── x.content.ts         # X isolated (capture + run Threads→X auto-post)
+│   └── x-main.content.ts    # X MAIN (Draft inject + CreateTweet watch)
+├── hooks/                   # Shared React hooks (e.g. use-settings.ts)
+├── lib/                     # Core business logic
+│   ├── character-limits.ts  # Shared destination character limits
+│   ├── settings-defaults.ts # Default settings + reset source of truth
+│   ├── cross-post/          # Pending text, page messages, MAIN inject bridge
+│   ├── threads-to-x/        # Threads → X flow
+│   ├── x-to-threads/        # X → Threads flow
+│   ├── threads/             # Threads handlers, contexts, post-button detection
+│   ├── x/                   # X handlers, contexts, Premium cache
+│   ├── constants.ts         # Fallback selectors + merge helper
+│   ├── dom-utils.ts         # Draft.js / Lexical text extraction
+│   └── selectors.json       # OTA UI selectors + feature flags
 └── types/                   # TypeScript type definitions
 ```
 
@@ -90,9 +106,9 @@ Copy `.env.example` to `.env` before running locally:
 cp .env.example .env
 ```
 
-| Variable        | Values           | Description                                                                                                                                                       |
-| --------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `VITE_DEV_MODE` | `true` / `false` | When `true`, cross-posting is intercepted — posts are logged to the console instead of actually being sent. Set to `true` while developing to avoid double posts. |
+| Variable        | Values           | Description                                                                                                                                    |
+| --------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_DEV_MODE` | `true` / `false` | When `true`, the destination tab is not opened — pending text is still saved and logged. Set to `true` while developing to avoid double posts. |
 
 ### Loading the Extension
 
@@ -129,7 +145,7 @@ This will automatically:
 Contributions are welcome! If you'd like to help improve Yeet, please follow these steps:
 
 1. Fork the repository.
-2. Create a new branch for your feature or bugfix (`git checkout -b feature-name`).
+2. Create a new branch for your feature or bug fix (`git checkout -b feature-name`).
 3. Make your changes.
 4. Ensure your code passes the build step (`pnpm build`).
 5. Commit your changes (`git commit -m 'Add some feature'`).
@@ -140,8 +156,15 @@ When updating logic related to X or Threads DOM elements, **do not** hardcode th
 Instead, Yeet uses an **Over-The-Air (OTA) update system** for UI selectors. If a platform changes its UI (e.g., modifying a button's class name):
 
 1. Update `lib/selectors.json` with the new DOM selector (or feature flags).
-2. Push to the `main` branch. (`lib/constants.ts` imports this file directly, so there's no need to update fallbacks manually).
-   The extension automatically fetches the latest JSON payload from the raw GitHub URL in the background, fixing broken selectors for all users instantly without requiring a Web Store update!
+2. Keep `public/selectors.json` in sync if older builds still fetch it.
+3. Push to the `main` branch. (`lib/constants.ts` imports the lib JSON directly, so there's no need to update fallbacks manually).
+
+The extension automatically fetches the latest JSON payload from the raw GitHub URL in the background, fixing broken selectors for all users instantly without requiring a Web Store update!
+
+Feature flags in `selectors.json`:
+
+- `features.xToThreads` — gate X → Threads
+- `features.threadsToX` — gate Threads → X
 
 ## License
 
