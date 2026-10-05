@@ -6,9 +6,8 @@ export function PreferencesCard() {
         Preferences
       </h2>
       <p className="text-sm font-semibold text-ink/60 leading-relaxed">
-        Media options (images, videos, GIFs) are paused while we rebuild
-        X → Threads on a cleaner path. Text-only yeeting still works from the
-        cross-posting rules.
+        Right now Yeet only supports text from X → Threads. Media and Threads →
+        X will come back later.
       </p>
     </div>
   );

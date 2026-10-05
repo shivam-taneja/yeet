@@ -1,11 +1,7 @@
 import { browser } from "wxt/browser";
 import { FALLBACK_SELECTORS, mergeSelectors } from "@/lib/constants";
 import { observeAndTagComposers } from "@/lib/x/context";
-import {
-  handleXPostClick,
-  handleXPostKeydown,
-  handleXAutoPost,
-} from "@/lib/x/handlers";
+import { handleXPostClick, handleXPostKeydown } from "@/lib/x/handlers";
 
 export default defineContentScript({
   matches: ["*://*.x.com/*"],
@@ -39,6 +35,5 @@ export default defineContentScript({
       },
       true,
     );
-    handleXAutoPost(SELECTORS);
   },
 });

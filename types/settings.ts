@@ -19,7 +19,6 @@ export enum YeetProgressStatus {
 export interface AppSettings {
   isActive: boolean;
   xContexts: Record<XContext, boolean>;
-  threadsContexts: Record<XContext, boolean>;
   lastSavedAt: number | null;
   lastYeet: {
     text: string;

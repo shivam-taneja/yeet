@@ -12,13 +12,6 @@ const defaultSettings: AppSettings = {
     reply: false,
     thread: false,
   },
-  threadsContexts: {
-    "new-post": true,
-    "mention-post": false,
-    quote: false,
-    reply: false,
-    thread: false,
-  },
   lastSavedAt: null,
   lastYeet: null,
   yeetProgress: { status: YeetProgressStatus.IDLE },
@@ -28,7 +21,6 @@ export function useSettings() {
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load initially
   useEffect(() => {
     browser.storage.local.get(Object.keys(defaultSettings)).then((result) => {
       setSettings((prev) => ({
@@ -59,7 +51,6 @@ export function useSettings() {
     });
   }, []);
 
-  // Sync state changes across tabs/popup (if another context changes storage)
   useEffect(() => {
     const handleStorageChange = (
       changes: Record<string, any>,
@@ -95,10 +86,7 @@ export function useSettings() {
       lastSavedAt: timestamp,
     };
 
-    // Optimistic UI update
     setSettings((prev) => ({ ...prev, ...finalUpdates }));
-
-    // Save to chrome storage
     await browser.storage.local.set(finalUpdates);
   }, []);
 

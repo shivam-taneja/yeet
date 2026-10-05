@@ -1,6 +1,5 @@
 /**
  * Resolve when `predicate` becomes true, driven only by DOM mutations.
- * No timers — waits for real page state changes.
  */
 export function waitFor(
   predicate: () => boolean,

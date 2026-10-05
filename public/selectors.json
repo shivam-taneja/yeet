@@ -1,11 +1,13 @@
 {
+  "features": {
+    "xToThreads": true
+  },
   "x": {
     "composer": "[data-testid=\"tweetTextarea_0\"]",
-    "postButtons": "[data-testid=\"tweetButtonInline\"], [data-testid=\"tweetButton\"]",
-    "intentPostButton": "[data-testid=\"tweetButton\"]"
+    "postButtons": "[data-testid=\"tweetButtonInline\"], [data-testid=\"tweetButton\"]"
   },
   "threads": {
-    "composer": "[data-lexical-editor=\"true\"]",
+    "composer": "div[contenteditable=\"true\"][data-lexical-editor=\"true\"][role=\"textbox\"]",
     "postButton": "div[role=\"button\"]"
   }
 }

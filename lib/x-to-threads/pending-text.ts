@@ -2,6 +2,7 @@ import { browser } from "wxt/browser";
 
 const STORAGE_KEY = "pendingYeetText";
 
+/** Exact text waiting to be injected into Threads. Cleared only after post success. */
 export async function savePendingText(text: string): Promise<void> {
   await browser.storage.local.set({ [STORAGE_KEY]: text });
 }

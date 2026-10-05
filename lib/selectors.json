@@ -1,12 +1,10 @@
 {
   "features": {
-    "xToThreads": true,
-    "threadsToX": false
+    "xToThreads": true
   },
   "x": {
     "composer": "[data-testid=\"tweetTextarea_0\"]",
-    "postButtons": "[data-testid=\"tweetButtonInline\"], [data-testid=\"tweetButton\"]",
-    "intentPostButton": "[data-testid=\"tweetButton\"]"
+    "postButtons": "[data-testid=\"tweetButtonInline\"], [data-testid=\"tweetButton\"]"
   },
   "threads": {
     "composer": "div[contenteditable=\"true\"][data-lexical-editor=\"true\"][role=\"textbox\"]",

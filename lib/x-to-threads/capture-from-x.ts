@@ -1,17 +1,20 @@
 import { browser } from "wxt/browser";
 import { extractTextFromDraftEditor } from "@/lib/dom-utils";
-import { savePendingText } from "@/lib/pending-text";
+import { savePendingText } from "@/lib/x-to-threads/pending-text";
 import type { AppSettings } from "@/types/settings";
 import { YeetProgressStatus } from "@/types/settings";
 import { getComposerContext, defaultXContexts } from "@/lib/x/context";
 import type { SelectorsConfig } from "@/types/selectors";
 import { BackgroundAction } from "@/types/messaging";
 
-/** Blank Threads composer — text is injected from storage, not the URL. */
-const THREADS_AUTO_POST_URL =
+/** Blank Threads composer — text comes from storage, not the URL. */
+export const THREADS_AUTO_POST_URL =
   "https://www.threads.com/intent/post?yeet_auto_post=true";
 
-export async function doYeet(
+/**
+ * Step 1 — On X: capture composer text, stash it, open Threads in the background.
+ */
+export async function captureFromX(
   e: Event | null,
   selectors: SelectorsConfig,
 ): Promise<void> {
