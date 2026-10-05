@@ -7,7 +7,7 @@ export const defaultThreadsContexts: AppSettings["threadsContexts"] = {
   thread: false,
 };
 
-function contextFromPlaceholder(
+export function contextFromPlaceholder(
   placeholder: string,
 ): ThreadsContext | "unknown" {
   const p = placeholder.trim();
@@ -18,31 +18,38 @@ function contextFromPlaceholder(
   return "unknown";
 }
 
+export function readComposerPlaceholder(composer: Element): string {
+  return (
+    composer.getAttribute("aria-placeholder")?.trim() ||
+    composer
+      .closest(".x6ikm8r")
+      ?.querySelector('[aria-hidden="true"] span')
+      ?.textContent?.trim() ||
+    ""
+  );
+}
+
+function tagComposer(composer: Element): void {
+  const ctx = contextFromPlaceholder(readComposerPlaceholder(composer));
+  composer.setAttribute("data-yeet-context", ctx);
+}
+
 export function observeAndTagThreadsComposers(composerSelector: string) {
-  const observer = new MutationObserver(() => {
-    const composers = document.querySelectorAll(composerSelector);
-
-    composers.forEach((composer) => {
-      if (composer.hasAttribute("data-yeet-context")) return;
-
-      const placeholder =
-        composer.getAttribute("aria-placeholder")?.trim() ||
-        composer
-          .closest(".x6ikm8r")
-          ?.querySelector('[aria-hidden="true"] span')
-          ?.textContent?.trim() ||
-        "";
-
-      const ctx = contextFromPlaceholder(placeholder);
-      composer.setAttribute("data-yeet-context", ctx);
+  const retag = () => {
+    document.querySelectorAll(composerSelector).forEach((composer) => {
+      tagComposer(composer);
     });
-  });
+  };
 
+  retag();
+
+  const observer = new MutationObserver(retag);
   const targetNode = document.documentElement || document;
   observer.observe(targetNode, {
     childList: true,
     subtree: true,
     attributes: true,
+    attributeFilter: ["aria-placeholder", "data-lexical-editor"],
   });
 }
 
@@ -50,6 +57,11 @@ export function getThreadsComposerContext(
   editorElement: Element | null,
 ): ThreadsContext | "unknown" {
   if (!editorElement) return "unknown";
+
+  // Always prefer live placeholder — attribute can be stale after remounts.
+  const live = contextFromPlaceholder(readComposerPlaceholder(editorElement));
+  if (live !== "unknown") return live;
+
   return (
     (editorElement.getAttribute("data-yeet-context") as
       | ThreadsContext

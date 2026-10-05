@@ -7,36 +7,82 @@ import {
   getThreadsComposerContext,
   defaultThreadsContexts,
 } from "@/lib/threads/context";
+import { getLastActiveThreadsComposer } from "@/lib/threads/active-composer";
+import {
+  findComposersNearPostButton,
+  findThreadsPostSubmitFromEvent,
+} from "@/lib/threads/post-button";
 import type { SelectorsConfig } from "@/types/selectors";
 import { BackgroundAction } from "@/types/messaging";
 
 /** Blank X intent — body text comes from storage, not the URL. */
 export const X_AUTO_POST_URL = "https://x.com/intent/post?yeet_auto_post=true";
 
+function pickBestComposer(candidates: Element[]): Element | null {
+  if (candidates.length === 0) return null;
+
+  const withText = candidates.filter(
+    (el) => extractTextFromLexicalEditor(el).length > 0,
+  );
+  if (withText.length > 0) {
+    return withText[withText.length - 1] ?? null;
+  }
+
+  return candidates[candidates.length - 1] ?? null;
+}
+
 function findActiveComposer(
   e: Event | null,
   selectors: SelectorsConfig,
 ): Element | null {
-  if (e?.target instanceof Element) {
-    const dialog = e.target.closest('[role="dialog"]');
-    if (dialog) {
-      const inDialog = dialog.querySelector(selectors.threads.composer);
-      if (inDialog) return inDialog;
-    }
-    const fromTarget = e.target.closest(selectors.threads.composer);
-    if (fromTarget) return fromTarget;
+  const last = getLastActiveThreadsComposer();
+  if (last && extractTextFromLexicalEditor(last).length > 0) {
+    return last;
   }
 
-  const all = Array.from(document.querySelectorAll(selectors.threads.composer));
-  return (
-    all.find((el) => {
-      const text = extractTextFromLexicalEditor(el);
-      return text.length > 0;
-    }) ||
-    all.find((el) => el.closest('[role="dialog"]')) ||
-    all[0] ||
-    null
+  if (e?.target instanceof Element) {
+    const fromTarget = e.target.closest(selectors.threads.composer);
+    if (fromTarget && extractTextFromLexicalEditor(fromTarget).length > 0) {
+      return fromTarget;
+    }
+
+    const submit = findThreadsPostSubmitFromEvent(e.target, selectors);
+    if (submit) {
+      const near = findComposersNearPostButton(
+        submit,
+        selectors.threads.composer,
+      );
+      const best = pickBestComposer(near);
+      if (best && extractTextFromLexicalEditor(best).length > 0) return best;
+    }
+
+    const dialog = e.target.closest('[role="dialog"]');
+    if (dialog) {
+      const best = pickBestComposer(
+        Array.from(dialog.querySelectorAll(selectors.threads.composer)),
+      );
+      if (best && extractTextFromLexicalEditor(best).length > 0) return best;
+    }
+  }
+
+  return pickBestComposer(
+    Array.from(document.querySelectorAll(selectors.threads.composer)),
   );
+}
+
+/**
+ * Snapshot composer state synchronously — Threads clears the editor as soon as
+ * Post is pressed, so we must not await storage before reading text.
+ */
+function snapshotComposer(
+  e: Event | null,
+  selectors: SelectorsConfig,
+): { text: string; ctx: ReturnType<typeof getThreadsComposerContext> } {
+  const editorElement = findActiveComposer(e, selectors);
+  return {
+    text: extractTextFromLexicalEditor(editorElement) || "",
+    ctx: getThreadsComposerContext(editorElement),
+  };
 }
 
 /** On Threads: capture composer text, stash it, open X in the background. */
@@ -44,14 +90,15 @@ export async function captureFromThreads(
   e: Event | null,
   selectors: SelectorsConfig,
 ): Promise<void> {
+  // CRITICAL: read text before any await — native Post clears the composer.
+  const { text, ctx } = snapshotComposer(e, selectors);
+
   const storage = await browser.storage.local.get([
     "isActive",
     "threadsContexts",
   ]);
   if (storage.isActive === false) return;
 
-  const editorElement = findActiveComposer(e, selectors);
-  const ctx = getThreadsComposerContext(editorElement);
   const threadsContexts = (storage.threadsContexts ??
     defaultThreadsContexts) as AppSettings["threadsContexts"];
 
@@ -59,8 +106,6 @@ export async function captureFromThreads(
     console.log(`[Yeet] Skipping — context "${ctx}" is not enabled.`);
     return;
   }
-
-  const text = extractTextFromLexicalEditor(editorElement) || "";
 
   if (!text) {
     console.log("[Yeet] No text found to cross-post.");

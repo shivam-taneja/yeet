@@ -1,13 +1,15 @@
 import type { SelectorsConfig } from "@/types/selectors";
 import { captureFromThreads } from "@/lib/threads-to-x/capture-from-threads";
+import { findThreadsPostSubmitFromEvent } from "@/lib/threads/post-button";
 
-function isPostButton(
-  target: HTMLElement,
-  selectors: SelectorsConfig,
-): boolean {
-  const btn = target.closest(selectors.threads.postButtons);
-  if (!btn) return false;
-  return btn.textContent?.toLowerCase().trim() === "post";
+let lastCaptureAt = 0;
+
+function captureOnce(e: Event, selectors: SelectorsConfig): void {
+  const now = Date.now();
+  // click + pointerup can both fire — only yeet once per gesture
+  if (now - lastCaptureAt < 800) return;
+  lastCaptureAt = now;
+  void captureFromThreads(e, selectors);
 }
 
 export function handleThreadsPostClick(
@@ -17,11 +19,13 @@ export function handleThreadsPostClick(
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("yeet_auto_post")) return;
 
-  const target = e.target as HTMLElement;
-  if (isPostButton(target, selectors)) {
-    console.log("[Yeet] Intercepted Threads Post button click.");
-    captureFromThreads(e, selectors);
-  }
+  const submit = findThreadsPostSubmitFromEvent(e.target, selectors);
+  if (!submit) return;
+
+  console.log("[Yeet] Intercepted Threads Post button click.", {
+    label: submit.textContent?.trim().slice(0, 40),
+  });
+  captureOnce(e, selectors);
 }
 
 export function handleThreadsPostKeydown(
@@ -35,7 +39,7 @@ export function handleThreadsPostKeydown(
     const target = e.target as HTMLElement;
     if (target.closest(selectors.threads.composer)) {
       console.log("[Yeet] Intercepted Threads Post via Cmd+Enter.");
-      captureFromThreads(e, selectors);
+      captureOnce(e, selectors);
     }
   }
 }

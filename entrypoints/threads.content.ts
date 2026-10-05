@@ -2,6 +2,7 @@ import { browser } from "wxt/browser";
 import { FALLBACK_SELECTORS, mergeSelectors } from "@/lib/constants";
 import { runThreadsAutoPost } from "@/lib/x-to-threads";
 import { observeAndTagThreadsComposers } from "@/lib/threads/context";
+import { trackThreadsComposerFocus } from "@/lib/threads/active-composer";
 import {
   handleThreadsPostClick,
   handleThreadsPostKeydown,
@@ -21,15 +22,17 @@ export default defineContentScript({
       observeAndTagThreadsComposers(SELECTORS.threads.composer);
     });
 
-    document.addEventListener(
-      "click",
-      (e) => {
-        if (SELECTORS.features.threadsToX !== false) {
-          handleThreadsPostClick(e, SELECTORS);
-        }
-      },
-      true,
-    );
+    trackThreadsComposerFocus(FALLBACK_SELECTORS.threads.composer);
+
+    const onActivate = (e: Event) => {
+      if (SELECTORS.features.threadsToX === false) return;
+      handleThreadsPostClick(e, SELECTORS);
+    };
+
+    // Capture both — Threads sometimes fires submit work off pointerup.
+    document.addEventListener("click", onActivate, true);
+    document.addEventListener("pointerup", onActivate, true);
+
     document.addEventListener(
       "keydown",
       (e) => {
