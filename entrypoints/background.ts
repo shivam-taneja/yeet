@@ -38,11 +38,11 @@ export default defineBackground(() => {
       message.url
     ) {
       console.log("[Yeet] Opening background tab:", message.url);
-      // Chrome throttles background tabs, so X intent URLs must be active
+      // X intent pages need focus (Chrome throttles them hard).
+      // Threads yeets always open in the background.
       const isXIntent =
         message.url.includes("x.com") || message.url.includes("twitter.com");
-      const needsFocus = isXIntent || message.hasMedia === true;
-      browser.tabs.create({ url: message.url, active: needsFocus });
+      browser.tabs.create({ url: message.url, active: isXIntent });
     }
 
     if (message.action === BackgroundAction.CLOSE_TAB) {

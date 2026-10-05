@@ -17,9 +17,6 @@ export enum YeetProgressStatus {
 }
 
 export interface AppSettings {
-  copyImages: boolean;
-  copyVideos: boolean;
-  copyGifs: boolean;
   isActive: boolean;
   xContexts: Record<XContext, boolean>;
   threadsContexts: Record<XContext, boolean>;
@@ -29,6 +26,7 @@ export interface AppSettings {
     timestamp: number;
     platform: "X" | "Threads";
     postUrl?: string;
+    postId?: string;
   } | null;
   yeetProgress?: {
     status: YeetProgressStatus;

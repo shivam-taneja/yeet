@@ -4,9 +4,6 @@ import type { AppSettings } from "@/types/settings";
 import { YeetProgressStatus } from "@/types/settings";
 
 const defaultSettings: AppSettings = {
-  copyImages: true,
-  copyVideos: true,
-  copyGifs: true,
   isActive: true,
   xContexts: {
     "new-post": true,
@@ -37,19 +34,6 @@ export function useSettings() {
       setSettings((prev) => ({
         ...prev,
         ...result,
-        // Override with loaded values if they exist, fallback to defaults
-        copyImages:
-          result.copyImages !== undefined
-            ? (result.copyImages as boolean)
-            : defaultSettings.copyImages,
-        copyVideos:
-          result.copyVideos !== undefined
-            ? (result.copyVideos as boolean)
-            : defaultSettings.copyVideos,
-        copyGifs:
-          result.copyGifs !== undefined
-            ? (result.copyGifs as boolean)
-            : defaultSettings.copyGifs,
         isActive:
           result.isActive !== undefined
             ? (result.isActive as boolean)
