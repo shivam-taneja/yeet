@@ -18,6 +18,24 @@ fi
 echo "Pushing tag to origin to ensure GitHub CLI can see it..."
 git push origin "$TAG"
 
-echo "Opening GitHub CLI interactive release creator..."
-# Launch the interactive gh CLI tool
-gh release create "$TAG" --title "Yeet $TAG"
+# CI may have already created this release (with zips). Recreate so you get the
+# same interactive notes prompt — assets are downloaded and re-attached.
+if gh release view "$TAG" >/dev/null 2>&1; then
+  echo "Release already exists — keeping assets, recreating so you can set notes..."
+  ASSET_DIR=$(mktemp -d)
+  trap 'rm -rf "$ASSET_DIR"' EXIT
+  gh release download "$TAG" -D "$ASSET_DIR" 2>/dev/null || true
+  gh release delete "$TAG" --yes
+
+  shopt -s nullglob
+  ASSETS=("$ASSET_DIR"/*)
+  echo "Opening GitHub CLI interactive release creator..."
+  if ((${#ASSETS[@]})); then
+    gh release create "$TAG" --title "Yeet $TAG" "${ASSETS[@]}"
+  else
+    gh release create "$TAG" --title "Yeet $TAG"
+  fi
+else
+  echo "Opening GitHub CLI interactive release creator..."
+  gh release create "$TAG" --title "Yeet $TAG"
+fi
