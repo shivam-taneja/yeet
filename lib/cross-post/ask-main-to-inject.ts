@@ -1,12 +1,9 @@
 import {
   YeetPageMessage,
   type YeetInjectDoneMessage,
-} from "@/lib/x-to-threads/messages";
+} from "@/lib/cross-post/messages";
 
-/**
- * Ask MAIN to inject text via Lexical setEditorState.
- * Isolated-world paste/execCommand cannot drive Lexical.
- */
+/** Ask page MAIN world to inject text into the destination composer. */
 export function askMainWorldToInject(
   text: string,
   composerSelector: string,

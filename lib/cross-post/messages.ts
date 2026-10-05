@@ -1,4 +1,4 @@
-/** window.postMessage types between isolated Threads script ↔ MAIN world. */
+/** window.postMessage types between isolated content scripts ↔ MAIN world. */
 export const YeetPageMessage = {
   INJECT_TEXT: "YEET_INJECT_TEXT",
   INJECT_DONE: "YEET_INJECT_DONE",

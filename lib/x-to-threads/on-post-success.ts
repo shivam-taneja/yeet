@@ -1,9 +1,9 @@
 import { browser } from "wxt/browser";
-import { clearPendingText } from "@/lib/x-to-threads/pending-text";
+import { clearPendingText } from "@/lib/cross-post/pending-text";
 import {
   YeetPageMessage,
   type YeetPostSuccessMessage,
-} from "@/lib/x-to-threads/messages";
+} from "@/lib/cross-post/messages";
 import { YeetProgressStatus } from "@/types/settings";
 import { BackgroundAction } from "@/types/messaging";
 

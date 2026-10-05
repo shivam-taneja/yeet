@@ -1,6 +1,10 @@
 import { browser } from "wxt/browser";
 import { extractTextFromDraftEditor } from "@/lib/dom-utils";
-import { savePendingText } from "@/lib/x-to-threads/pending-text";
+import { savePendingText } from "@/lib/cross-post/pending-text";
+import {
+  CHARACTER_LIMITS,
+  formatOverLimitMessage,
+} from "@/lib/character-limits";
 import type { AppSettings } from "@/types/settings";
 import { YeetProgressStatus } from "@/types/settings";
 import { getComposerContext, defaultXContexts } from "@/lib/x/context";
@@ -48,10 +52,8 @@ export async function captureFromX(
     return;
   }
 
-  if (text.length > 500) {
-    alert(
-      "Yeet failed: Threads only supports up to 500 characters per post! Your post is too big to Yeet.",
-    );
+  if (text.length > CHARACTER_LIMITS.threads) {
+    alert(formatOverLimitMessage("Threads", CHARACTER_LIMITS.threads));
     return;
   }
 

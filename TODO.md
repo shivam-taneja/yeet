@@ -1,11 +1,12 @@
 # Yeet Roadmap & TODOs
 
-## Current status (X → Threads)
+## Current status (text)
 
-- [x] **Text cross-post** — Capture from X → storage → Lexical `setEditorState` on Threads → Post → intercept permalink/postId → close tab (`lib/x-to-threads/`)
-- [x] **Background tab for text-only** — Threads intent opens inactive
+- [x] **X → Threads** — Capture → storage → Lexical inject → Post → permalink → close tab (`lib/x-to-threads/`)
+- [x] **Threads → X** — Capture → storage → Draft inject on X intent → CreateTweet → close tab (`lib/threads-to-x/`)
+- [x] **Background intent tabs** — Text-only yeets open inactive tabs
 - [x] **Progress indicators + last-yeet link** — Popup shows yeeting / done + post URL
-- [x] **X composer contexts** — new-post / mention / quote / reply toggles in options
+- [x] **Composer context toggles** — Matrix rules in options (both directions)
 
 ## Features in Pipeline
 
@@ -23,8 +24,7 @@
 
 ### Core Functionality
 
-- [ ] **Threads → X** — Removed from the codebase (was OTA-gated / broken). Rebuild later using Lexical-first approach similar to X → Threads, not fragile DOM scraping
-- [ ] **Thread continuation** — Detect an existing Threads post and append when continuing a thread on X
+- [ ] **Thread continuation** — Detect an existing post and append when continuing a thread
 - [ ] **Resilient retries** — If X succeeds but Threads fails, offer “retry Threads only” without double-posting X
 
 ### Bugs & Limitations

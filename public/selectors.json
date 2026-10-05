@@ -1,6 +1,7 @@
 {
   "features": {
-    "xToThreads": true
+    "xToThreads": true,
+    "threadsToX": true
   },
   "x": {
     "composer": "[data-testid=\"tweetTextarea_0\"]",
@@ -8,6 +9,7 @@
   },
   "threads": {
     "composer": "div[contenteditable=\"true\"][data-lexical-editor=\"true\"][role=\"textbox\"]",
-    "postButton": "div[role=\"button\"]"
+    "postButton": "div[role=\"button\"]",
+    "postButtons": "div[role=\"button\"]"
   }
 }

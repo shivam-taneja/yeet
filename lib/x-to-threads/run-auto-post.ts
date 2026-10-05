@@ -1,7 +1,7 @@
 import { browser } from "wxt/browser";
-import { getPendingText } from "@/lib/x-to-threads/pending-text";
+import { getPendingText } from "@/lib/cross-post/pending-text";
 import { waitFor } from "@/lib/x-to-threads/wait-for";
-import { askMainWorldToInject } from "@/lib/x-to-threads/ask-main-to-inject";
+import { askMainWorldToInject } from "@/lib/cross-post/ask-main-to-inject";
 import {
   findPostButton,
   isComposerReadyToPost,

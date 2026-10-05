@@ -2,6 +2,8 @@ import { browser } from "wxt/browser";
 import { FALLBACK_SELECTORS, mergeSelectors } from "@/lib/constants";
 import { observeAndTagComposers } from "@/lib/x/context";
 import { handleXPostClick, handleXPostKeydown } from "@/lib/x/handlers";
+import { cacheXPremiumFlag } from "@/lib/x/premium";
+import { runXAutoPost } from "@/lib/threads-to-x";
 
 export default defineContentScript({
   matches: ["*://*.x.com/*"],
@@ -13,6 +15,18 @@ export default defineContentScript({
       if (res.selectors) {
         SELECTORS = mergeSelectors(res.selectors);
       }
+      if (SELECTORS.features.threadsToX !== false) {
+        runXAutoPost(SELECTORS);
+      }
+    });
+
+    void cacheXPremiumFlag();
+    const premiumObserver = new MutationObserver(() => {
+      void cacheXPremiumFlag();
+    });
+    premiumObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
     });
 
     observeAndTagComposers();

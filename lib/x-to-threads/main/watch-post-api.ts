@@ -1,4 +1,4 @@
-import { YeetPageMessage } from "@/lib/x-to-threads/messages";
+import { YeetPageMessage } from "@/lib/cross-post/messages";
 
 function extractPermalink(data: any): string | null {
   return (

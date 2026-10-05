@@ -7,7 +7,6 @@ import {
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PlatformBadge } from "@/components/shared/platform-badge";
 import { YeetProgressStatus } from "@/types/settings";
 import { formatDistanceToNow } from "date-fns";
 import { browser } from "wxt/browser";
@@ -34,19 +33,11 @@ export function ActiveStateStatusCards({
         <Construction className="size-5 shrink-0 mt-0.5" />
         <div className="min-w-0 w-full">
           <p className="text-sm font-bold text-ink/70">
-            Threads → X is coming soon
+            Threads → X is turned off
           </p>
           <p className="mt-1 text-xs font-semibold">
-            We're working on it. X → Threads works great in the meantime!
+            Yeet is temporarily unavailable for this direction.
           </p>
-          <Button
-            variant="outline"
-            className="mt-3 h-12 w-full justify-start gap-3 rounded-xl border-2 border-ink bg-cream font-bold hover:bg-ink/5 shadow-[2px_2px_0_var(--color-ink)] transition-transform hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--color-ink)] active:translate-y-1 active:shadow-none"
-            onClick={() => browser.tabs.create({ url: "https://x.com" })}
-          >
-            <PlatformBadge name="X" />
-            <span className="font-bold text-base">Open X to Yeet</span>
-          </Button>
         </div>
       </div>
     );

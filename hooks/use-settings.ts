@@ -1,78 +1,88 @@
 import { useState, useEffect, useCallback } from "react";
 import { browser } from "wxt/browser";
 import type { AppSettings } from "@/types/settings";
-import { YeetProgressStatus } from "@/types/settings";
+import {
+  APP_SETTINGS_STORAGE_KEYS,
+  DEFAULT_APP_SETTINGS,
+} from "@/lib/settings-defaults";
+import { clearPendingText } from "@/lib/cross-post/pending-text";
 
-const defaultSettings: AppSettings = {
-  isActive: true,
-  xContexts: {
-    "new-post": true,
-    "mention-post": false,
-    quote: false,
-    reply: false,
-    thread: false,
-  },
-  lastSavedAt: null,
-  lastYeet: null,
-  yeetProgress: { status: YeetProgressStatus.IDLE },
-};
+function mergeLoadedSettings(result: Record<string, unknown>): AppSettings {
+  return {
+    ...DEFAULT_APP_SETTINGS,
+    copyImages:
+      result.copyImages !== undefined
+        ? (result.copyImages as boolean)
+        : DEFAULT_APP_SETTINGS.copyImages,
+    copyVideos:
+      result.copyVideos !== undefined
+        ? (result.copyVideos as boolean)
+        : DEFAULT_APP_SETTINGS.copyVideos,
+    copyGifs:
+      result.copyGifs !== undefined
+        ? (result.copyGifs as boolean)
+        : DEFAULT_APP_SETTINGS.copyGifs,
+    isActive:
+      result.isActive !== undefined
+        ? (result.isActive as boolean)
+        : DEFAULT_APP_SETTINGS.isActive,
+    xContexts:
+      result.xContexts !== undefined
+        ? (result.xContexts as AppSettings["xContexts"])
+        : DEFAULT_APP_SETTINGS.xContexts,
+    threadsContexts:
+      result.threadsContexts !== undefined
+        ? (result.threadsContexts as AppSettings["threadsContexts"])
+        : DEFAULT_APP_SETTINGS.threadsContexts,
+    lastSavedAt:
+      result.lastSavedAt !== undefined
+        ? (result.lastSavedAt as number | null)
+        : DEFAULT_APP_SETTINGS.lastSavedAt,
+    lastYeet:
+      result.lastYeet !== undefined
+        ? (result.lastYeet as AppSettings["lastYeet"])
+        : DEFAULT_APP_SETTINGS.lastYeet,
+    yeetProgress:
+      result.yeetProgress !== undefined
+        ? (result.yeetProgress as AppSettings["yeetProgress"])
+        : DEFAULT_APP_SETTINGS.yeetProgress,
+  };
+}
 
 export function useSettings() {
-  const [settings, setSettings] = useState<AppSettings>(defaultSettings);
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_APP_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    browser.storage.local.get(Object.keys(defaultSettings)).then((result) => {
-      setSettings((prev) => ({
-        ...prev,
-        ...result,
-        isActive:
-          result.isActive !== undefined
-            ? (result.isActive as boolean)
-            : defaultSettings.isActive,
-        xContexts:
-          result.xContexts !== undefined
-            ? (result.xContexts as AppSettings["xContexts"])
-            : defaultSettings.xContexts,
-        lastSavedAt:
-          result.lastSavedAt !== undefined
-            ? (result.lastSavedAt as number)
-            : defaultSettings.lastSavedAt,
-        lastYeet:
-          result.lastYeet !== undefined
-            ? (result.lastYeet as typeof defaultSettings.lastYeet)
-            : defaultSettings.lastYeet,
-        yeetProgress:
-          result.yeetProgress !== undefined
-            ? (result.yeetProgress as typeof defaultSettings.yeetProgress)
-            : defaultSettings.yeetProgress,
-      }));
+    browser.storage.local.get(APP_SETTINGS_STORAGE_KEYS).then((result) => {
+      setSettings(mergeLoadedSettings(result));
       setIsLoading(false);
     });
   }, []);
 
   useEffect(() => {
     const handleStorageChange = (
-      changes: Record<string, any>,
+      changes: Record<string, { newValue?: unknown }>,
       areaName: string,
     ) => {
-      if (areaName === "local") {
-        setSettings((prev) => {
-          const next = { ...prev };
-          let hasChanges = false;
+      if (areaName !== "local") return;
 
-          for (const key of Object.keys(defaultSettings) as Array<
-            keyof AppSettings
-          >) {
-            if (changes[key]) {
-              next[key] = changes[key].newValue as never;
+      setSettings((prev) => {
+        let next = prev;
+        let hasChanges = false;
+
+        for (const key of APP_SETTINGS_STORAGE_KEYS) {
+          if (changes[key]) {
+            if (!hasChanges) {
+              next = { ...prev };
               hasChanges = true;
             }
+            next[key] = changes[key].newValue as never;
           }
+        }
 
-          return hasChanges ? next : prev;
-        });
-      }
+        return hasChanges ? next : prev;
+      });
     };
 
     browser.storage.onChanged.addListener(handleStorageChange);
@@ -90,5 +100,17 @@ export function useSettings() {
     await browser.storage.local.set(finalUpdates);
   }, []);
 
-  return { settings, updateSettings, isLoading };
+  const resetToDefaults = useCallback(async () => {
+    const timestamp = Date.now();
+    const next: AppSettings = {
+      ...DEFAULT_APP_SETTINGS,
+      lastSavedAt: timestamp,
+    };
+
+    setSettings(next);
+    await browser.storage.local.set(next);
+    await clearPendingText();
+  }, []);
+
+  return { settings, updateSettings, resetToDefaults, isLoading };
 }

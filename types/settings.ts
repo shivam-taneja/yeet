@@ -9,6 +9,9 @@ export type XContext =
 // ComposerContext = XContext + the unrecognised fallback
 export type ComposerContext = XContext | "unknown";
 
+/** Threads composer contexts (no profile mention-post on Threads). */
+export type ThreadsContext = Exclude<XContext, "mention-post">;
+
 export enum YeetProgressStatus {
   IDLE = "idle",
   YEETING = "yeeting",
@@ -17,8 +20,12 @@ export enum YeetProgressStatus {
 }
 
 export interface AppSettings {
+  copyImages: boolean;
+  copyVideos: boolean;
+  copyGifs: boolean;
   isActive: boolean;
   xContexts: Record<XContext, boolean>;
+  threadsContexts: Record<ThreadsContext, boolean>;
   lastSavedAt: number | null;
   lastYeet: {
     text: string;

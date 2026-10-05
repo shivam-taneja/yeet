@@ -1,7 +1,7 @@
 import {
   YeetPageMessage,
   type YeetInjectTextMessage,
-} from "@/lib/x-to-threads/messages";
+} from "@/lib/cross-post/messages";
 import {
   injectTextViaLexical,
   readLexicalPlainText,

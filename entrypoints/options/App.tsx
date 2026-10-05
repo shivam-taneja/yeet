@@ -11,20 +11,15 @@ export default function App() {
   if (isLoading) return null;
 
   return (
-    <div className="min-h-screen bg-cream font-body text-ink flex flex-col items-center py-12 px-4 md:px-8 selection:bg-mint/30">
+    <div className="min-h-screen bg-cream font-body text-ink flex flex-col items-center py-8 sm:py-12 px-4 sm:px-6 md:px-8 selection:bg-mint/30">
       <div className="w-full max-w-5xl">
         <Header />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch mb-6">
-          <div className="md:col-start-2 md:row-start-1">
+        <div className="flex flex-col gap-6 mb-6">
+          <CrossPostingRules />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
             <PreferencesCard />
-          </div>
-
-          <div className="md:col-start-1 md:row-start-1 md:row-span-2 h-full">
-            <CrossPostingRules />
-          </div>
-
-          <div className="md:col-start-2 md:row-start-2 h-full">
             <SupportCard />
           </div>
         </div>

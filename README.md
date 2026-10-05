@@ -12,8 +12,7 @@ https://github.com/user-attachments/assets/1b7b4be9-996c-411b-a182-0f14d98a52e6
 
 ## Features
 
-- Cross-post from X to Threads automatically (text).
-- Threads → X cross-posting is not shipping yet (rebuild planned).
+- Bidirectional text cross-posting (X ↔ Threads).
 - Supports standard mouse clicks and Cmd/Ctrl + Enter shortcuts.
 - Gracefully handles character limits (e.g., 280 for X, 500 for Threads).
 - Real-time progress indicators when yeeting posts.
@@ -34,13 +33,17 @@ Check out the [TODO.md](./TODO.md) file for the full list of planned features, i
 │   ├── background.ts        # Background service worker handling tab management
 │   ├── options/             # Options page source files
 │   ├── popup/               # Popup page source files
-│   ├── threads.content.ts   # Threads isolated script (auto-post orchestration)
+│   ├── threads.content.ts   # Threads isolated script (capture + X→Threads auto-post)
 │   ├── threads-main.content.ts  # Threads MAIN world (Lexical + fetch patch)
-│   └── x.content.ts         # X content script (intercept Post)
+│   ├── x.content.ts         # X isolated script (capture + Threads→X auto-post)
+│   └── x-main.content.ts    # X MAIN world (Draft inject + CreateTweet watch)
 ├── hooks/                   # Shared React hooks (e.g., use-settings.ts)
 ├── lib/                     # Core business logic and shared utilities
+│   ├── cross-post/          # Shared pending text, messages, MAIN inject bridge
+│   ├── threads-to-x/        # Threads → X capture, Draft inject, network watch
 │   ├── x-to-threads/        # X → Threads capture, Lexical inject, network watch
-│   ├── x/                   # X content-script handlers + composer context
+│   ├── threads/             # Threads capture handlers + composer context
+│   ├── x/                   # X capture handlers + composer context
 │   ├── constants.ts         # Imports and exports fallback UI selectors
 │   ├── dom-utils.ts         # DOM text extraction helpers
 │   └── selectors.json       # Single source of truth for OTA UI selectors
