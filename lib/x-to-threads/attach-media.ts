@@ -1,5 +1,5 @@
 /**
- * Attach Files to Threads' native composer file input (Crossposter-style).
+ * Attach Files to Threads' native composer file input.
  * Prefer input.files + change over Lexical paste — paste is for text only here.
  */
 
@@ -150,7 +150,7 @@ export function attachFilesToInput(
   return compatible.length;
 }
 
-/** Drop fallback when no file input is found (Crossposter pattern). */
+/** Drop fallback when no file input is found. */
 function attachViaDrop(files: File[], root: ParentNode): number {
   const compatible = compatibleImageFiles(files);
   if (!compatible.length) return 0;

@@ -19,7 +19,8 @@ https://github.com/user-attachments/assets/1b7b4be9-996c-411b-a182-0f14d98a52e6
 - Per-direction composer rules in Settings (new posts always on; mention / quote / reply toggles; thread continuation coming soon).
 - Real-time progress indicators when yeeting, plus a clickable last-yeet link in the popup.
 - Global pause/resume toggle and **Reset everything to default** in Settings.
-- Copy Videos / GIFs toggles are visible but locked until that support ships. Threads → X images next.
+- Copy Videos / GIFs toggles are visible but locked until that support ships.
+- **Next:** images Threads → X.
 
 ## TODO / Roadmap
 
@@ -35,7 +36,9 @@ See [TODO.md](./TODO.md) for the full list (Threads → X images, videos/GIFs, r
 
 ### Images (X → Threads)
 
-X revokes composer `blob:` URLs as soon as you hit Post, so Yeet **warm-caches** image `File`s while you compose. On yeet it prefers that cache, then attaches on Threads with the same file-input pattern as [Crossposter](https://github.com/lassecat/crossposter), waits until a `picture > blob:` preview sticks and Post is enabled, then auto-clicks Post — all in a background tab.
+X revokes composer `blob:` URLs as soon as you hit Post, so Yeet **warm-caches** image `File`s while you compose — scoped to the **compose shell** only (never timeline media). On yeet it attaches on Threads via `input.files` + `change`, waits until a `picture > blob:` preview sticks and Post is enabled, then auto-clicks Post in a background tab.
+
+If the X composer has a **video or GIF**, Yeet skips the cross-post (alert) so it doesn’t send a broken or wrong media handoff; your X post still goes through.
 
 | Direction   | Capture                         | Inject / attach                          | Success watch                  |
 | ----------- | ------------------------------- | ---------------------------------------- | ------------------------------ |

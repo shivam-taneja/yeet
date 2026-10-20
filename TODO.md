@@ -8,8 +8,9 @@
 - [x] Settings matrix, progress UI, last-yeet link, reset to defaults
 - [x] Body text via storage (no URL `?text=`) — links / OG behave normally
 - [x] **Images (X → Threads)** — warm cache → storage → file-input attach → auto-Post in a background tab
-  - Prefetch Files while composing (X revokes `blob:` on Post)
-  - `input.files` + `change` (Crossposter-style); drop fallback
+  - Prefetch `File`s from the **composer shell only** (never timeline / feed media)
+  - Skip yeet when video/GIF is attached (not supported yet); alert + leave X post alone
+  - `input.files` + `change`; drop fallback if no file input
   - Data URLs via FileReader (no spread-`btoa` / no `fetch(data:)`)
   - Wait for durable `picture > blob:` preview + enabled Post before click
 
@@ -17,7 +18,7 @@
 
 ### Media
 
-- [ ] **Images (Threads → X)** — Same attach pattern the other way
+- [ ] **Images (Threads → X)** — Capture on Threads → stash → attach on X intent (mirror X → Threads)
 - [ ] **Videos / GIFs** — After images; unlock Preferences toggles
 
 ### Product

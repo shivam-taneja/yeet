@@ -13,6 +13,7 @@
  * WHERE TO LOOK WHEN SOMETHING BREAKS:
  *   - Empty images at Post         → warm-image-cache.ts (X revoked blob: too early)
  *   - Wrong / random images        → capture-images.ts (must stay composer-scoped, not feed)
+ *   - Video/GIF yeet attempted     → capture-from-x.ts (should alert + skip)
  *   - Composer / Post not found    → lib/selectors.json (threads.*)
  *   - Text not appearing           → main/inject-text.ts
  *   - Images not attaching         → attach-media.ts (file input / drop / preview detect)
