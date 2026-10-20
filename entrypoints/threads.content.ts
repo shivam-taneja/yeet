@@ -9,7 +9,8 @@ import {
 } from "@/lib/threads/handlers";
 
 export default defineContentScript({
-  matches: ["*://*.threads.com/*"],
+  // Apex + www — `*.threads.com` alone misses https://threads.com/
+  matches: ["*://*.threads.com/*", "*://threads.com/*"],
   main() {
     console.log("[Yeet] Threads content script ready.");
 

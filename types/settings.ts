@@ -36,5 +36,7 @@ export interface AppSettings {
   } | null;
   yeetProgress?: {
     status: YeetProgressStatus;
+    /** True when images were attached and we're waiting for the user to Post. */
+    awaitingManualPost?: boolean;
   } | null;
 }

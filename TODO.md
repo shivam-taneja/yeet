@@ -12,12 +12,11 @@
 
 ### Media
 
-- [ ] **Images** — X → Threads first, then Threads → X. Known pitfalls:
-  - Upload `ok` ≠ attached to draft
-  - Background tabs drop previews; focused tab is more reliable
-  - Don’t reset Lexical after attaching media
-  - Prefer MAIN-world paste/drop over file-input `change`
-  - Use chunked base64 (never huge `btoa(String.fromCharCode(...))`)
+- [x] **Images (X → Threads)** — Capture → storage → file-input attach; user hits Post
+  - Focused tab for media; text-only stays background
+  - `input.files` + `change` (Crossposter-style); drop fallback
+  - Data URLs via FileReader (no spread-`btoa` / no `fetch(data:)`)
+- [ ] **Images (Threads → X)** — Same attach pattern the other way
 - [ ] **Videos / GIFs** — After images; unlock Preferences toggles
 
 ### Product

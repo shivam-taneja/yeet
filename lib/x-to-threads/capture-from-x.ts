@@ -1,6 +1,20 @@
 import { browser } from "wxt/browser";
 import { extractTextFromDraftEditor } from "@/lib/dom-utils";
-import { savePendingText } from "@/lib/cross-post/pending-text";
+import { savePendingText, clearPendingText } from "@/lib/cross-post/pending-text";
+import {
+  savePendingImages,
+  clearPendingImages,
+  MAX_PENDING_IMAGES,
+} from "@/lib/cross-post/pending-images";
+import {
+  snapshotXComposerImageSrcs,
+  filesFromImageSrcs,
+} from "@/lib/x-to-threads/capture-images";
+import {
+  awaitWarmCachedImages,
+  clearWarmImageCache,
+} from "@/lib/x-to-threads/warm-image-cache";
+import { markYeetHandoff } from "@/lib/cross-post/yeet-handoff";
 import {
   CHARACTER_LIMITS,
   formatOverLimitMessage,
@@ -11,18 +25,16 @@ import { getComposerContext, defaultXContexts } from "@/lib/x/context";
 import type { SelectorsConfig } from "@/types/selectors";
 import { BackgroundAction } from "@/types/messaging";
 
-/** Blank Threads intent — body text comes from storage, not the URL. */
+/** Threads intent — body text/images come from storage, not the URL. */
 export const THREADS_AUTO_POST_URL =
   "https://www.threads.com/intent/post?yeet_auto_post=true";
 
-/** On X: capture composer text, stash it, open Threads in the background. */
+/** On X: capture composer text (+ images), stash, open Threads intent. */
 export async function captureFromX(
   e: Event | null,
   selectors: SelectorsConfig,
 ): Promise<void> {
-  const storage = await browser.storage.local.get(["isActive", "xContexts"]);
-  if (storage.isActive === false) return;
-
+  // ——— SYNC: grab whatever is still in the DOM + warm cache ———
   let editorElement: Element | null = null;
   if (e?.target instanceof Element) {
     const dialog = e.target.closest('[role="dialog"]');
@@ -36,6 +48,20 @@ export async function captureFromX(
       all.find((el) => !el.closest('[role="dialog"]')) || all[0] || null;
   }
 
+  const text = extractTextFromDraftEditor(editorElement) || "";
+  const container = editorElement?.closest('[role="dialog"]') || document;
+  const liveSrcs = snapshotXComposerImageSrcs(container);
+  // ——— end sync ———
+
+  const storage = await browser.storage.local.get([
+    "isActive",
+    "xContexts",
+    "copyImages",
+  ]);
+  if (storage.isActive === false) return;
+
+  console.log("[Yeet] copyImages setting:", storage.copyImages);
+
   const ctx = getComposerContext(editorElement);
   const xContexts = (storage.xContexts ??
     defaultXContexts) as AppSettings["xContexts"];
@@ -45,10 +71,33 @@ export async function captureFromX(
     return;
   }
 
-  const text = extractTextFromDraftEditor(editorElement) || "";
+  let imageFiles: File[] = [];
+  if (storage.copyImages === true) {
+    // Prefer warm cache — live blob: URLs are often already revoked at Post.
+    imageFiles = await awaitWarmCachedImages(1000);
+    if (imageFiles.length === 0 && liveSrcs.length > 0) {
+      imageFiles = await filesFromImageSrcs(liveSrcs);
+    }
+    if (imageFiles.length === 0) {
+      console.warn(
+        "[Yeet] copyImages ON but warm cache empty and no live srcs — text only.",
+      );
+    }
 
-  if (!text) {
-    console.log("[Yeet] No text found to cross-post.");
+    if (imageFiles.length > MAX_PENDING_IMAGES) {
+      console.warn(
+        `[Yeet] Capping images to ${MAX_PENDING_IMAGES} (Threads limit).`,
+      );
+      imageFiles = imageFiles.slice(0, MAX_PENDING_IMAGES);
+    }
+  } else if (liveSrcs.length > 0) {
+    console.log(
+      "[Yeet] Images present but Copy Images is OFF — enable it in Options.",
+    );
+  }
+
+  if (!text && imageFiles.length === 0) {
+    console.log("[Yeet] No text or images found to cross-post.");
     return;
   }
 
@@ -57,9 +106,23 @@ export async function captureFromX(
     return;
   }
 
-  console.log("[Yeet] Extracted text:", text);
+  const hasMedia = imageFiles.length > 0;
+  console.log(
+    "[Yeet] Extracted text:",
+    text || "(none)",
+    "| images:",
+    imageFiles.length,
+    hasMedia ? "→ intent FOCUSED" : "→ intent background",
+  );
 
-  await savePendingText(text);
+  await clearPendingText();
+  await clearPendingImages();
+
+  if (text) await savePendingText(text);
+  if (imageFiles.length > 0) await savePendingImages(imageFiles);
+
+  await markYeetHandoff(hasMedia ? "media" : "text");
+  clearWarmImageCache();
 
   await browser.storage.local.set({
     lastYeet: {
@@ -72,8 +135,9 @@ export async function captureFromX(
 
   if (import.meta.env.VITE_DEV_MODE === "true") {
     console.log(
-      "[Yeet] DEV MODE — skipping Threads tab. Pending text saved; would open:",
+      "[Yeet] DEV MODE — skipping Threads tab. Pending saved; would open:",
       THREADS_AUTO_POST_URL,
+      hasMedia ? "(focused — media)" : "(background)",
     );
     return;
   }
@@ -81,5 +145,6 @@ export async function captureFromX(
   browser.runtime.sendMessage({
     action: BackgroundAction.OPEN_BACKGROUND_TAB,
     url: THREADS_AUTO_POST_URL,
+    active: hasMedia,
   });
 }

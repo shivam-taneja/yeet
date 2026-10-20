@@ -37,9 +37,25 @@ export default defineBackground(() => {
       message.action === BackgroundAction.OPEN_BACKGROUND_TAB &&
       message.url
     ) {
-      console.log("[Yeet] Opening background tab:", message.url);
-      // X → Threads always stays in the background.
-      browser.tabs.create({ url: message.url, active: false });
+      // Text-only yeets stay in the background. Media needs a focused tab so
+      // Threads builds its file input / preview (Crossposter pattern).
+      const active = Boolean(message.active);
+      console.log(
+        "[Yeet] Opening tab:",
+        message.url,
+        active ? "(focused)" : "(background)",
+      );
+      void browser.tabs.create({ url: message.url, active }).then(async (tab) => {
+        if (!active || tab.id == null) return;
+        try {
+          await browser.tabs.update(tab.id, { active: true });
+          if (tab.windowId != null) {
+            await browser.windows.update(tab.windowId, { focused: true });
+          }
+        } catch (err) {
+          console.warn("[Yeet] Failed to focus opened tab:", err);
+        }
+      });
     }
 
     if (message.action === BackgroundAction.CLOSE_TAB) {
@@ -51,7 +67,17 @@ export default defineBackground(() => {
 
     if (message.action === BackgroundAction.FOCUS_TAB) {
       if (sender.tab?.id) {
-        browser.tabs.update(sender.tab.id, { active: true });
+        const tabId = sender.tab.id;
+        const windowId = sender.tab.windowId;
+        void browser.tabs.update(tabId, { active: true }).then(async () => {
+          if (windowId != null) {
+            try {
+              await browser.windows.update(windowId, { focused: true });
+            } catch {
+              /* ignore */
+            }
+          }
+        });
       }
     }
   });

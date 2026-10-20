@@ -82,7 +82,9 @@ export function ActiveStateStatusCards({
           </span>
           <div className="min-w-0 w-full mt-0.5">
             <p className="text-sm font-bold text-ink">
-              Yeeting to {targetPlatform}...
+              {settings.yeetProgress?.awaitingManualPost
+                ? `Images ready on ${targetPlatform} — hit Post`
+                : `Yeeting to ${targetPlatform}...`}
             </p>
             <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full border border-ink bg-ink/10">
               <div className="h-full w-full origin-left animate-pulse bg-grape transition-all duration-500 ease-in-out" />

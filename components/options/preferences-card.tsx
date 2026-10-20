@@ -3,7 +3,8 @@ import { SettingRow } from "@/components/shared/setting-row";
 import { useSettings } from "@/hooks/use-settings";
 
 export function PreferencesCard() {
-  const { settings, resetToDefaults, isLoading } = useSettings();
+  const { settings, updateSettings, resetToDefaults, isLoading } =
+    useSettings();
   const [isResetting, setIsResetting] = useState(false);
 
   if (isLoading) return null;
@@ -31,11 +32,11 @@ export function PreferencesCard() {
       <div className="flex flex-col divide-y-2 divide-ink/10">
         <SettingRow
           label="Copy Images"
-          description="Automatically include images when yeeting."
+          description="Include images when yeeting X → Threads. You’ll confirm Post on Threads."
           checked={settings.copyImages}
-          onChange={() => {}}
-          locked
-          comingSoon
+          onChange={() =>
+            updateSettings({ copyImages: !settings.copyImages })
+          }
         />
         <SettingRow
           label="Copy Videos"

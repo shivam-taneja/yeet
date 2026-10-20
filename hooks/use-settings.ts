@@ -6,6 +6,8 @@ import {
   DEFAULT_APP_SETTINGS,
 } from "@/lib/settings-defaults";
 import { clearPendingText } from "@/lib/cross-post/pending-text";
+import { clearPendingImages } from "@/lib/cross-post/pending-images";
+import { clearYeetHandoff } from "@/lib/cross-post/yeet-handoff";
 
 function mergeLoadedSettings(result: Record<string, unknown>): AppSettings {
   return {
@@ -110,6 +112,8 @@ export function useSettings() {
     setSettings(next);
     await browser.storage.local.set(next);
     await clearPendingText();
+    await clearPendingImages();
+    await clearYeetHandoff();
   }, []);
 
   return { settings, updateSettings, resetToDefaults, isLoading };
