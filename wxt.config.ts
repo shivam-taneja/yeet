@@ -19,6 +19,9 @@ export default defineConfig({
   webExt: {
     disabled: true,
   },
+  zip: {
+    excludeSources: ["motion/**"],
+  },
   manifest: {
     permissions: [
       "activeTab",
@@ -36,5 +39,11 @@ export default defineConfig({
       "*://*.instagram.com/*",
       "*://instagram.com/*",
     ],
+    browser_specific_settings: {
+      gecko: {
+        id: "yeet@shivamtaneja.com",
+        strict_min_version: "109.0",
+      },
+    },
   },
 });
