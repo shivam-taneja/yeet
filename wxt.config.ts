@@ -22,14 +22,15 @@ export default defineConfig({
   zip: {
     excludeSources: ["motion/**"],
   },
-  manifest: {
+  manifest: ({ browser }) => ({
     permissions: [
       "activeTab",
       "storage",
       "unlimitedStorage",
       "cookies",
       "tabs",
-      "windows",
+      // Chrome/Edge only — Firefox rejects "windows" as an invalid permission.
+      ...(browser === "firefox" ? [] : ["windows"]),
     ],
     host_permissions: [
       "*://*.x.com/*",
@@ -43,7 +44,10 @@ export default defineConfig({
       gecko: {
         id: "yeet@shivamtaneja.com",
         strict_min_version: "109.0",
+        data_collection_permissions: {
+          required: ["none"],
+        },
       },
     },
-  },
+  }),
 });
