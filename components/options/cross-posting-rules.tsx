@@ -1,25 +1,15 @@
-import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { browser } from "wxt/browser";
 import { useSettings } from "@/hooks/use-settings";
 import type { ThreadsContext, XContext } from "@/types/settings";
 import {
   MatrixSettingRow,
   matrixRulesGridClass,
 } from "@/components/shared/matrix-setting-row";
-import { FALLBACK_SELECTORS, mergeSelectors } from "@/lib/constants";
+import { SELECTORS } from "@/lib/constants";
 
 export function CrossPostingRules() {
   const { settings, updateSettings } = useSettings();
-  const [selectors, setSelectors] = useState(FALLBACK_SELECTORS);
-
-  useEffect(() => {
-    browser.storage.local.get(["selectors"]).then((res) => {
-      if (res.selectors) {
-        setSelectors(mergeSelectors(res.selectors));
-      }
-    });
-  }, []);
+  const selectors = SELECTORS;
 
   const handleXContext = (key: XContext) => {
     updateSettings({

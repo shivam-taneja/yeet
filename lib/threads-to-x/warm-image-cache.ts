@@ -4,7 +4,7 @@ import {
   threadsComposerHasUnsupportedMedia,
   findThreadsComposerMediaRoots,
 } from "@/lib/threads-to-x/capture-images";
-import { FALLBACK_SELECTORS } from "@/lib/constants";
+import { SELECTORS } from "@/lib/constants";
 
 /**
  * Threads clears composer attachments on Post (often before we can fetch
@@ -15,7 +15,7 @@ let cachedFiles: File[] = [];
 let cachedSrcKey = "";
 let prefetching = false;
 let observer: MutationObserver | null = null;
-let composerSelector = FALLBACK_SELECTORS.threads.composer;
+let composerSelector = SELECTORS.threads.composer;
 
 function srcKey(srcs: string[]): string {
   return srcs.slice().sort().join("|");

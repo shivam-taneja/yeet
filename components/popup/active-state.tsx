@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { browser } from "wxt/browser";
 import { useSettings } from "@/hooks/use-settings";
-import { FALLBACK_SELECTORS, mergeSelectors } from "@/lib/constants";
+import { SELECTORS } from "@/lib/constants";
 import { ActiveStateHeader } from "./active-state/header";
 import { ActiveStateHero } from "./active-state/hero";
 import { ActiveStateStatusCards } from "./active-state/status-cards";
@@ -24,9 +24,7 @@ export function ActiveState({
     x: boolean;
     threads: boolean;
   } | null>(null);
-  const [threadsToXEnabled, setThreadsToXEnabled] = useState(
-    FALLBACK_SELECTORS.features.threadsToX !== false,
-  );
+  const threadsToXEnabled = SELECTORS.features.threadsToX !== false;
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 10000);
@@ -56,15 +54,6 @@ export function ActiveState({
       }
     };
     checkLinkedAccounts();
-  }, []);
-
-  useEffect(() => {
-    browser.storage.local.get(["selectors"]).then((res) => {
-      const selectors = res.selectors
-        ? mergeSelectors(res.selectors)
-        : FALLBACK_SELECTORS;
-      setThreadsToXEnabled(selectors.features.threadsToX !== false);
-    });
   }, []);
 
   const linkedAccounts = authStatus

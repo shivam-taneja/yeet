@@ -1,5 +1,4 @@
-import { browser } from "wxt/browser";
-import { FALLBACK_SELECTORS, mergeSelectors } from "@/lib/constants";
+import { SELECTORS } from "@/lib/constants";
 import { observeAndTagComposers } from "@/lib/x/context";
 import { handleXPostClick, handleXPostKeydown } from "@/lib/x/handlers";
 import { cacheXPremiumFlag } from "@/lib/x/premium";
@@ -14,15 +13,9 @@ export default defineContentScript({
     // Prefetch composer images while user attaches — Post revokes blob: URLs.
     startWarmImageCache();
 
-    let SELECTORS = FALLBACK_SELECTORS;
-    browser.storage.local.get(["selectors"]).then((res) => {
-      if (res.selectors) {
-        SELECTORS = mergeSelectors(res.selectors);
-      }
-      if (SELECTORS.features.threadsToX !== false) {
-        runXAutoPost(SELECTORS);
-      }
-    });
+    if (SELECTORS.features.threadsToX !== false) {
+      runXAutoPost(SELECTORS);
+    }
 
     void cacheXPremiumFlag();
     const premiumObserver = new MutationObserver(() => {

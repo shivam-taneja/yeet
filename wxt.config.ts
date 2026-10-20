@@ -35,7 +35,6 @@ export default defineConfig({
       "*://threads.com/*",
       "*://*.instagram.com/*",
       "*://instagram.com/*",
-      "https://raw.githubusercontent.com/shivam-taneja/yeet/*",
     ],
   },
 });

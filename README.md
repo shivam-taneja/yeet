@@ -51,7 +51,7 @@ Videos / GIFs are not copied yet — Yeet skips the cross-post with an alert; yo
 ├── assets/                  # Static assets like fonts, icons, and tailwind.css
 ├── components/              # React components (Popup UI, Options, Shared UI)
 ├── entrypoints/             # WXT Entrypoints
-│   ├── background.ts        # Background service worker (tabs + OTA selectors)
+│   ├── background.ts        # Background service worker (tabs)
 │   ├── options/             # Options page
 │   ├── popup/               # Popup page
 │   ├── threads.content.ts   # Threads isolated (capture + warm cache + X→Threads auto-post)
@@ -69,7 +69,7 @@ Videos / GIFs are not copied yet — Yeet skips the cross-post with an alert; yo
 │   ├── x/                   # X handlers, contexts, Premium cache
 │   ├── constants.ts         # Fallback selectors + merge helper
 │   ├── dom-utils.ts         # Draft.js / Lexical text extraction
-│   └── selectors.json       # OTA UI selectors + feature flags
+│   └── selectors.json       # Bundled UI selectors + feature flags
 └── types/                   # TypeScript type definitions
 ```
 
@@ -159,14 +159,7 @@ Contributions are welcome! If you'd like to help improve Yeet, please follow the
 6. Push to the branch (`git push origin feature-name`).
 7. Open a Pull Request.
 
-When updating logic related to X or Threads DOM elements, **do not** hardcode them in the content scripts.
-Instead, Yeet uses an **Over-The-Air (OTA) update system** for UI selectors. If a platform changes its UI (e.g., modifying a button's class name):
-
-1. Update `lib/selectors.json` with the new DOM selector (or feature flags).
-2. Keep `public/selectors.json` in sync if older builds still fetch it.
-3. Push to the `main` branch. (`lib/constants.ts` imports the lib JSON directly, so there's no need to update fallbacks manually).
-
-The extension automatically fetches the latest JSON payload from the raw GitHub URL in the background, fixing broken selectors for all users instantly without requiring a Web Store update!
+When X or Threads change their UI, update the selectors in `lib/selectors.json` (imported by `lib/constants.ts`) and ship a new extension build. Don’t hardcode platform selectors in content scripts.
 
 Feature flags in `selectors.json`:
 

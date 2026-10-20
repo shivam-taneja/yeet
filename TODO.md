@@ -29,5 +29,5 @@
 
 ## Later / tech debt
 
-- [ ] Drop `public/selectors.json` when legacy OTA consumers are gone
+- [x] Drop OTA selectors fetch + `public/selectors.json` (bundled `lib/selectors.json` only)
 - [ ] X Premium on bare intent tabs (cache from a normal x.com visit for now)
