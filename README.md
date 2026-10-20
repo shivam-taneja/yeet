@@ -13,29 +13,34 @@ https://github.com/user-attachments/assets/1b7b4be9-996c-411b-a182-0f14d98a52e6
 ## Features
 
 - Bidirectional **text** cross-posting (X ↔ Threads).
+- **Images X → Threads** — enable **Copy Images** in Settings; yeets in a background tab and auto-Posts.
 - Works from popup composers, feed posts, and inline reply bars (Post click + Cmd/Ctrl + Enter).
 - Respects destination character limits (Threads 500; X 280 free / 25,000 Premium via sidebar detection).
 - Per-direction composer rules in Settings (new posts always on; mention / quote / reply toggles; thread continuation coming soon).
 - Real-time progress indicators when yeeting, plus a clickable last-yeet link in the popup.
 - Global pause/resume toggle and **Reset everything to default** in Settings.
-- Media copy toggles are visible but locked until image support ships.
+- Copy Videos / GIFs toggles are visible but locked until that support ships. Threads → X images next.
 
 ## TODO / Roadmap
 
-Check out the [TODO.md](./TODO.md) file for the full list of planned features, including media support and resilient retries.
+See [TODO.md](./TODO.md) for the full list (Threads → X images, videos/GIFs, retries, etc.).
 
-## How it works (text)
+## How it works
 
 1. **Capture** on the source platform when you Post (or Cmd/Ctrl + Enter).
-2. **Stash** plain text in extension storage (nothing goes in the intent URL).
+2. **Stash** text (and images, if enabled) in extension storage — nothing goes in the intent URL.
 3. Open a **background intent tab** on the destination (`?yeet_auto_post=true`).
-4. **MAIN-world inject** — Lexical `setEditorState` on Threads, Draft.js on X.
-5. Click Post, watch the create-post API for permalink/id, then close the tab.
+4. **MAIN-world inject** — Lexical on Threads, Draft.js on X; images via native `input[type=file]` + `change`.
+5. Click Post (after media preview is durable when images are present), watch the create-post API for permalink/id, then close the tab.
 
-| Direction   | Capture           | Inject                   | Success watch                  |
-| ----------- | ----------------- | ------------------------ | ------------------------------ |
-| X → Threads | Draft.js composer | Lexical (`threads-main`) | Threads configure*text*\* APIs |
-| Threads → X | Lexical composer  | Draft.js (`x-main`)      | X `CreateTweet`                |
+### Images (X → Threads)
+
+X revokes composer `blob:` URLs as soon as you hit Post, so Yeet **warm-caches** image `File`s while you compose. On yeet it prefers that cache, then attaches on Threads with the same file-input pattern as [Crossposter](https://github.com/lassecat/crossposter), waits until a `picture > blob:` preview sticks and Post is enabled, then auto-clicks Post — all in a background tab.
+
+| Direction   | Capture                         | Inject / attach                          | Success watch                  |
+| ----------- | ------------------------------- | ---------------------------------------- | ------------------------------ |
+| X → Threads | Draft.js + warm image cache     | Lexical + file input (`threads-main`)    | Threads configure*text*\* APIs |
+| Threads → X | Lexical composer (text for now) | Draft.js (`x-main`)                      | X `CreateTweet`                |
 
 ## Project Structure
 
@@ -55,9 +60,9 @@ Check out the [TODO.md](./TODO.md) file for the full list of planned features, i
 ├── lib/                     # Core business logic
 │   ├── character-limits.ts  # Shared destination character limits
 │   ├── settings-defaults.ts # Default settings + reset source of truth
-│   ├── cross-post/          # Pending text, page messages, MAIN inject bridge
-│   ├── threads-to-x/        # Threads → X flow
-│   ├── x-to-threads/        # X → Threads flow
+│   ├── cross-post/          # Pending text/images, handoff, MAIN inject/attach bridge
+│   ├── threads-to-x/        # Threads → X flow (text; images next)
+│   ├── x-to-threads/        # X → Threads flow (text + images, warm cache, attach)
 │   ├── threads/             # Threads handlers, contexts, post-button detection
 │   ├── x/                   # X handlers, contexts, Premium cache
 │   ├── constants.ts         # Fallback selectors + merge helper

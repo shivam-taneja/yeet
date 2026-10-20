@@ -32,7 +32,7 @@ export function PreferencesCard() {
       <div className="flex flex-col divide-y-2 divide-ink/10">
         <SettingRow
           label="Copy Images"
-          description="Include images when yeeting X → Threads. You’ll confirm Post on Threads."
+          description="Include images when yeeting X → Threads (auto-posts in a background tab)."
           checked={settings.copyImages}
           onChange={() =>
             updateSettings({ copyImages: !settings.copyImages })

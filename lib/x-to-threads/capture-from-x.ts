@@ -34,7 +34,7 @@ export async function captureFromX(
   e: Event | null,
   selectors: SelectorsConfig,
 ): Promise<void> {
-  // ——— SYNC: grab whatever is still in the DOM + warm cache ———
+  // Sync before any await — X clears attachments / blob: URLs on Post.
   let editorElement: Element | null = null;
   if (e?.target instanceof Element) {
     const dialog = e.target.closest('[role="dialog"]');
@@ -51,7 +51,6 @@ export async function captureFromX(
   const text = extractTextFromDraftEditor(editorElement) || "";
   const container = editorElement?.closest('[role="dialog"]') || document;
   const liveSrcs = snapshotXComposerImageSrcs(container);
-  // ——— end sync ———
 
   const storage = await browser.storage.local.get([
     "isActive",
@@ -112,7 +111,7 @@ export async function captureFromX(
     text || "(none)",
     "| images:",
     imageFiles.length,
-    hasMedia ? "→ intent FOCUSED" : "→ intent background",
+    "→ background intent",
   );
 
   await clearPendingText();
@@ -137,7 +136,7 @@ export async function captureFromX(
     console.log(
       "[Yeet] DEV MODE — skipping Threads tab. Pending saved; would open:",
       THREADS_AUTO_POST_URL,
-      hasMedia ? "(focused — media)" : "(background)",
+      "(background)",
     );
     return;
   }
@@ -145,6 +144,7 @@ export async function captureFromX(
   browser.runtime.sendMessage({
     action: BackgroundAction.OPEN_BACKGROUND_TAB,
     url: THREADS_AUTO_POST_URL,
-    active: hasMedia,
+    // Text and images both stay in a background tab.
+    active: false,
   });
 }

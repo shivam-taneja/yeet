@@ -37,8 +37,7 @@ export default defineBackground(() => {
       message.action === BackgroundAction.OPEN_BACKGROUND_TAB &&
       message.url
     ) {
-      // Text-only yeets stay in the background. Media needs a focused tab so
-      // Threads builds its file input / preview (Crossposter pattern).
+      // Caller sets `active` — X→Threads keeps the intent tab in the background.
       const active = Boolean(message.active);
       console.log(
         "[Yeet] Opening tab:",

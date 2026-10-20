@@ -69,8 +69,16 @@ async function focusTab(): Promise<void> {
 async function injectWithOptionalFocusRetry(
   text: string,
   composerSelector: string,
+  { allowFocus = true }: { allowFocus?: boolean } = {},
 ): Promise<boolean> {
   if (await askMainWorldToInject(text, composerSelector)) return true;
+
+  if (!allowFocus) {
+    console.warn(
+      "[Yeet] Inject failed in background tab — not focusing (media path).",
+    );
+    return false;
+  }
 
   console.warn(
     "[Yeet] Inject failed in background — focusing tab and retrying.",
@@ -80,15 +88,12 @@ async function injectWithOptionalFocusRetry(
 }
 
 /**
- * Focus intent tab → wait for composer settle + file input.
- * (Back to intent — home/New-thread path was a regression.)
+ * Wait for intent composer settle + file input (background tab OK).
  */
 async function waitForStableMediaComposer(
   selectors: SelectorsConfig,
   images: PendingImage[],
 ): Promise<boolean> {
-  await focusTab();
-
   await waitFor(() =>
     Boolean(document.querySelector(selectors.threads.composer)),
   );
@@ -130,6 +135,7 @@ async function ensureTextLanded(
   let injected = await injectWithOptionalFocusRetry(
     text,
     selectors.threads.composer,
+    { allowFocus: false },
   );
   if (!injected) return false;
 
@@ -173,12 +179,11 @@ async function attachUntilPreviewSticks(
     );
 
     if (lastInserted === 0) {
-      await focusTab();
       await sleep(300);
       continue;
     }
 
-    // Wait for preview to APPEAR in the DOM (MutationObserver), not a fixed sleep.
+    // DOM-driven: wait for preview to appear, then stay (not a fixed sleep).
     const appeared = await waitForTimeout(
       () => composerHasMediaPreview(composerSelector),
       PREVIEW_APPEAR_TIMEOUT_MS,
@@ -190,7 +195,7 @@ async function attachUntilPreviewSticks(
       continue;
     }
 
-    // Wait until it STAYS (flash-then-wipe resets the settle timer).
+    // Flash-then-wipe resets the settle timer until the preview sticks.
     const stuck = await waitForSettledTrue(
       () => composerHasMediaPreview(composerSelector),
       PREVIEW_SETTLE_MS,
@@ -364,7 +369,7 @@ export async function runThreadsAutoPost(
     return;
   }
 
-  // ——— Text-only ———
+  // Text-only path
   await waitFor(() =>
     Boolean(document.querySelector(selectors.threads.composer)),
   );
