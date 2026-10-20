@@ -39,10 +39,10 @@ Both platforms revoke composer `blob:` URLs on Post, so Yeet **warm-caches** ima
 
 Videos / GIFs are not copied yet — Yeet skips the cross-post with an alert; your source post still goes through. X is capped at 4 images per post.
 
-| Direction   | Capture                      | Inject / attach                              | Success watch                  |
-| ----------- | ---------------------------- | -------------------------------------------- | ------------------------------ |
-| X → Threads | Draft.js + warm image cache  | Lexical + file input (`threads-main`)        | Threads configure*text*\* APIs |
-| Threads → X | Lexical + warm image cache   | Draft.js + `fileInput` (`x-main`)            | X `CreateTweet`                |
+| Direction   | Capture                     | Inject / attach                       | Success watch                  |
+| ----------- | --------------------------- | ------------------------------------- | ------------------------------ |
+| X → Threads | Draft.js + warm image cache | Lexical + file input (`threads-main`) | Threads configure*text*\* APIs |
+| Threads → X | Lexical + warm image cache  | Draft.js + `fileInput` (`x-main`)     | X `CreateTweet`                |
 
 ## Project Structure
 
@@ -67,9 +67,9 @@ Videos / GIFs are not copied yet — Yeet skips the cross-post with an alert; yo
 │   ├── x-to-threads/        # X → Threads flow (text + images, warm cache, attach)
 │   ├── threads/             # Threads handlers, contexts, post-button detection
 │   ├── x/                   # X handlers, contexts, Premium cache
-│   ├── constants.ts         # Fallback selectors + merge helper
+│   ├── constants.ts         # Bundled SELECTORS from selectors.json
 │   ├── dom-utils.ts         # Draft.js / Lexical text extraction
-│   └── selectors.json       # Bundled UI selectors + feature flags
+│   └── selectors.json       # UI selectors + feature flags (shipped in the build)
 └── types/                   # TypeScript type definitions
 ```
 
@@ -113,9 +113,9 @@ Copy `.env.example` to `.env` before running locally:
 cp .env.example .env
 ```
 
-| Variable        | Values           | Description                                                                                                                                    |
-| --------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `VITE_DEV_MODE` | `true` / `false` | When `true`, the destination tab is not opened — pending text is still saved and logged. Set to `true` while developing to avoid double posts. |
+| Variable        | Values           | Description                                                                                                                                            |
+| --------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `VITE_DEV_MODE` | `true` / `false` | When `true`, the destination tab is not opened — pending text/images are still saved and logged. Set to `true` while developing to avoid double posts. |
 
 ### Loading the Extension
 
