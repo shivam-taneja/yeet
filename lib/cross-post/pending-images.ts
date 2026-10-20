@@ -11,8 +11,11 @@ export { fileFromDataUrl };
 
 const STORAGE_KEY = "pendingYeetImages";
 
-/** Threads carousel cap. */
+/** Threads carousel cap (storage). */
 export const MAX_PENDING_IMAGES = 10;
+
+/** X allows up to 4 images per post. */
+export const MAX_X_IMAGES = 4;
 
 /** Drop UI thumbs / placeholders — real uploads are much larger. */
 export const MIN_IMAGE_BYTES = 20_000;

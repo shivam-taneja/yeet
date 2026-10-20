@@ -1,5 +1,6 @@
 import { browser } from "wxt/browser";
 import { clearPendingText } from "@/lib/cross-post/pending-text";
+import { clearPendingImages } from "@/lib/cross-post/pending-images";
 import {
   YeetPageMessage,
   type YeetPostSuccessMessage,
@@ -7,6 +8,7 @@ import {
 import { YeetProgressStatus } from "@/types/settings";
 import { BackgroundAction } from "@/types/messaging";
 
+/** After X posts: save permalink/id, clear pending text/images, close tab. */
 export function listenForPostSuccess(): void {
   const messageListener = (event: MessageEvent) => {
     if (event.source !== window) return;
@@ -20,6 +22,7 @@ export function listenForPostSuccess(): void {
     window.removeEventListener("message", messageListener);
 
     void clearPendingText();
+    void clearPendingImages();
 
     browser.storage.local.get(["lastYeet"]).then((res) => {
       const lastYeet = res.lastYeet

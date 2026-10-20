@@ -9,16 +9,16 @@
 - [x] Body text via storage (no URL `?text=`) — links / OG behave normally
 - [x] **Images (X → Threads)** — warm cache → storage → file-input attach → auto-Post in a background tab
   - Prefetch `File`s from the **composer shell only** (never timeline / feed media)
-  - Skip yeet when video/GIF is attached (not supported yet); alert + leave X post alone
+  - Skip yeet when video/GIF is attached (not supported yet); alert + leave source post alone
   - `input.files` + `change`; drop fallback if no file input
   - Data URLs via FileReader (no spread-`btoa` / no `fetch(data:)`)
-  - Wait for durable `picture > blob:` preview + enabled Post before click
+  - Wait for durable media preview + enabled Post before click
+- [x] **Images (Threads → X)** — same pattern the other way (`fileInput` on X; max 4 images)
 
 ## Next
 
 ### Media
 
-- [ ] **Images (Threads → X)** — Capture on Threads → stash → attach on X intent (mirror X → Threads)
 - [ ] **Videos / GIFs** — After images; unlock Preferences toggles
 
 ### Product

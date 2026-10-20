@@ -1,6 +1,7 @@
 import { browser } from "wxt/browser";
 import { FALLBACK_SELECTORS, mergeSelectors } from "@/lib/constants";
 import { runThreadsAutoPost } from "@/lib/x-to-threads";
+import { startThreadsWarmImageCache } from "@/lib/threads-to-x/warm-image-cache";
 import { observeAndTagThreadsComposers } from "@/lib/threads/context";
 import { trackThreadsComposerFocus } from "@/lib/threads/active-composer";
 import {
@@ -13,6 +14,9 @@ export default defineContentScript({
   matches: ["*://*.threads.com/*", "*://threads.com/*"],
   main() {
     console.log("[Yeet] Threads content script ready.");
+
+    // Prefetch composer images while user attaches — Post revokes blob: URLs.
+    startThreadsWarmImageCache(FALLBACK_SELECTORS.threads.composer);
 
     let SELECTORS = FALLBACK_SELECTORS;
     browser.storage.local.get(["selectors"]).then((res) => {
