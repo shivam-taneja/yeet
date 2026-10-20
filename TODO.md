@@ -3,23 +3,24 @@
 ## Shipping now
 
 - [x] X → Threads and Threads → X **text** yeets (storage → inject → Post → permalink → close tab)
-- [x] Post click + Cmd/Ctrl+Enter (incl. Threads inline reply arrow)
-- [x] Character limits (Threads 500; X 280 / Premium 25k)
-- [x] Settings matrix, progress UI, last-yeet link, reset to defaults
-- [x] Body text via storage (no URL `?text=`) — links / OG behave normally
-- [x] **Images (X → Threads)** — warm cache → storage → file-input attach → auto-Post in a background tab
+- [x] **Images both ways** (X ↔ Threads) — warm cache → storage → file-input attach → auto-Post in a background tab
   - Prefetch `File`s from the **composer shell only** (never timeline / feed media)
   - Skip yeet when video/GIF is attached (not supported yet); alert + leave source post alone
   - `input.files` + `change`; drop fallback if no file input
   - Data URLs via FileReader (no spread-`btoa` / no `fetch(data:)`)
   - Wait for durable media preview + enabled Post before click
-- [x] **Images (Threads → X)** — same pattern the other way (`fileInput` on X; max 4 images)
+  - X capped at 4 images per post
+- [x] Post click + Cmd/Ctrl+Enter (incl. Threads inline reply arrow)
+- [x] Character limits (Threads 500; X 280 / Premium 25k)
+- [x] Settings matrix, progress UI, last-yeet link, reset to defaults
+- [x] Body text via storage (no URL `?text=`) — links / OG behave normally
+- [x] **Copy Images** preference unlocks both directions
 
 ## Next
 
 ### Media
 
-- [ ] **Videos / GIFs** — After images; unlock Preferences toggles
+- [ ] **Videos / GIFs** — unlock Preferences toggles; skip-alert becomes real copy
 
 ### Product
 

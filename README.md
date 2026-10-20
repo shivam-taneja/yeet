@@ -12,8 +12,8 @@ https://github.com/user-attachments/assets/1b7b4be9-996c-411b-a182-0f14d98a52e6
 
 ## Features
 
-- Bidirectional **text** cross-posting (X ↔ Threads).
-- **Images both ways** — enable **Copy Images** in Settings; yeets in a background tab and auto-Posts.
+- Bidirectional **text + images** cross-posting (X ↔ Threads).
+- Enable **Copy Images** in Settings; yeets run in a **background tab** and auto-Post.
 - Works from popup composers, feed posts, and inline reply bars (Post click + Cmd/Ctrl + Enter).
 - Respects destination character limits (Threads 500; X 280 free / 25,000 Premium via sidebar detection).
 - Per-direction composer rules in Settings (new posts always on; mention / quote / reply toggles; thread continuation coming soon).
@@ -23,7 +23,7 @@ https://github.com/user-attachments/assets/1b7b4be9-996c-411b-a182-0f14d98a52e6
 
 ## TODO / Roadmap
 
-See [TODO.md](./TODO.md) for the full list (videos/GIFs, retries, etc.).
+See [TODO.md](./TODO.md) for what’s next (videos/GIFs, thread continuation, retries, etc.).
 
 ## How it works
 
@@ -33,16 +33,16 @@ See [TODO.md](./TODO.md) for the full list (videos/GIFs, retries, etc.).
 4. **MAIN-world inject** — Lexical on Threads, Draft.js on X; images via native `input[type=file]` + `change`.
 5. Click Post (after media preview is durable when images are present), watch the create-post API for permalink/id, then close the tab.
 
-### Images
+### Images (X ↔ Threads)
 
-Both platforms revoke composer `blob:` URLs on Post, so Yeet **warm-caches** image `File`s while you compose — scoped to the **compose shell** only (never feed media). On the destination it attaches via the native `input[type=file]` + `change`, waits until a media preview sticks and Post is enabled, then auto-clicks Post in a background tab.
+Both platforms revoke composer `blob:` URLs on Post, so Yeet **warm-caches** image `File`s while you compose — scoped to the **compose shell** only (never feed media). On the destination it attaches via the native file input + `change`, waits until a media preview sticks and Post is enabled, then auto-clicks Post in a background tab.
 
-If the source composer has a **video or GIF**, Yeet skips the cross-post (alert); your source post still goes through. X caps at 4 images per post.
+Videos / GIFs are not copied yet — Yeet skips the cross-post with an alert; your source post still goes through. X is capped at 4 images per post.
 
-| Direction   | Capture                         | Inject / attach                       | Success watch                  |
-| ----------- | ------------------------------- | ------------------------------------- | ------------------------------ |
-| X → Threads | Draft.js + warm image cache     | Lexical + file input (`threads-main`) | Threads configure*text*\* APIs |
-| Threads → X | Lexical + warm image cache      | Draft.js + `fileInput` (`x-main`)     | X `CreateTweet`                |
+| Direction   | Capture                      | Inject / attach                              | Success watch                  |
+| ----------- | ---------------------------- | -------------------------------------------- | ------------------------------ |
+| X → Threads | Draft.js + warm image cache  | Lexical + file input (`threads-main`)        | Threads configure*text*\* APIs |
+| Threads → X | Lexical + warm image cache   | Draft.js + `fileInput` (`x-main`)            | X `CreateTweet`                |
 
 ## Project Structure
 
@@ -54,10 +54,10 @@ If the source composer has a **video or GIF**, Yeet skips the cross-post (alert)
 │   ├── background.ts        # Background service worker (tabs + OTA selectors)
 │   ├── options/             # Options page
 │   ├── popup/               # Popup page
-│   ├── threads.content.ts   # Threads isolated (capture + run X→Threads auto-post)
-│   ├── threads-main.content.ts  # Threads MAIN (Lexical inject + fetch patch)
-│   ├── x.content.ts         # X isolated (capture + run Threads→X auto-post)
-│   └── x-main.content.ts    # X MAIN (Draft inject + CreateTweet watch)
+│   ├── threads.content.ts   # Threads isolated (capture + warm cache + X→Threads auto-post)
+│   ├── threads-main.content.ts  # Threads MAIN (Lexical inject + media attach + fetch patch)
+│   ├── x.content.ts         # X isolated (capture + warm cache + Threads→X auto-post)
+│   └── x-main.content.ts    # X MAIN (Draft inject + media attach + CreateTweet watch)
 ├── hooks/                   # Shared React hooks (e.g. use-settings.ts)
 ├── lib/                     # Core business logic
 │   ├── character-limits.ts  # Shared destination character limits
