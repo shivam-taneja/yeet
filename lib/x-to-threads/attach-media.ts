@@ -32,42 +32,84 @@ export function findComposerRoot(composer: Element): Element {
   const dialog = composer.closest('[role="dialog"], dialog');
   if (dialog) return dialog;
 
+  // Prefer the ancestor that owns the real compose chrome (file input +
+  // "Attach media"), not a nested stray input.
   let current: Element | null = composer.parentElement;
+  let withFile: Element | null = null;
   while (current && current !== document.body) {
-    if (current.querySelector("input[type='file']")) return current;
+    if (current.querySelector("input[type='file']")) {
+      withFile = current;
+      if (
+        current.querySelector(
+          '[aria-label="Attach media"], picture img[src^="blob:"]',
+        )
+      ) {
+        return current;
+      }
+    }
     current = current.parentElement;
   }
-  return document.body;
+  return withFile || document.body;
+}
+
+function imageBoxSize(img: HTMLImageElement): { w: number; h: number } {
+  const w =
+    img.naturalWidth ||
+    img.width ||
+    Number(img.getAttribute("width")) ||
+    0;
+  const h =
+    img.naturalHeight ||
+    img.height ||
+    Number(img.getAttribute("height")) ||
+    0;
+  return { w, h };
+}
+
+function hasAttachmentRemoveControl(root: ParentNode): boolean {
+  if (
+    root.querySelector(
+      '[aria-label*="Remove" i], [aria-label*="Delete" i]',
+    )
+  ) {
+    return true;
+  }
+  // Threads puts title="Remove" / <title>Remove</title> on the SVG, not aria-label.
+  for (const el of Array.from(
+    root.querySelectorAll("svg[title], svg title, [title]"),
+  )) {
+    const t =
+      (el.getAttribute("title") || el.textContent || "").trim().toLowerCase();
+    if (t === "remove" || t === "delete") return true;
+  }
+  return false;
 }
 
 /**
- * Rough check that Threads kept a local media preview after attach.
- * Remounts wipe these — that's the flash-then-empty bug.
+ * True when Threads is showing an attached media preview in the composer.
+ * Real markup (2026-10): `<picture><img src="blob:https://www.threads.com/…">`
+ * sits as a sibling of Lexical, with an SVG "Remove" control on the thumb.
  */
 export function composerHasMediaPreview(composerSelector: string): boolean {
   const composer = document.querySelector(composerSelector);
   if (!composer) return false;
   const root = findComposerRoot(composer);
 
-  const imgs = Array.from(root.querySelectorAll("img"));
-  for (const img of imgs) {
-    const src = img.currentSrc || img.src || "";
-    // Local upload previews are blob:/data:; skip tiny chrome icons.
-    if (!src.startsWith("blob:") && !src.startsWith("data:")) continue;
-    const w = img.naturalWidth || img.width || 0;
-    const h = img.naturalHeight || img.height || 0;
+  // Prefer the explicit Threads preview: picture > blob img
+  const candidates = Array.from(
+    root.querySelectorAll(
+      'picture img[src^="blob:"], img[src^="blob:https://www.threads.com/"], img[src^="blob:"], img[src^="data:image"]',
+    ),
+  ) as HTMLImageElement[];
+
+  for (const img of candidates) {
+    // Skip icons / avatars — real previews are large (e.g. 1354×260).
+    const { w, h } = imageBoxSize(img);
     if (w > 0 && h > 0 && w < 48 && h < 48) continue;
     return true;
   }
 
-  // Some builds keep a remove/dismiss control on each attachment.
-  if (
-    root.querySelector(
-      '[aria-label*="Remove" i], [aria-label*="Delete" i], [aria-label*="photo" i]',
-    )
-  ) {
-    return true;
-  }
+  if (hasAttachmentRemoveControl(root)) return true;
 
   return false;
 }

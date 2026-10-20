@@ -5,7 +5,7 @@
  *   1. capture-from-x.ts      X: sync snapshot images → save pending → open intent tab
  *   2. run-auto-post.ts       Threads (isolated): inject → attach → Post
  *      - text-only: auto-click Post
- *      - with images: file-input attach, wait for user to Post
+ *      - with images: file-input attach → wait preview+Post ready → auto-click Post
  *   3. main/inject-text.ts    Threads (MAIN): Lexical setEditorState
  *   4. attach-media.ts        Threads (MAIN via message): input.files + change
  *   5. main/watch-post-api.ts Threads (MAIN): intercept post API → permalink + postId

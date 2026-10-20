@@ -6,6 +6,7 @@ import {
   waitFor,
   waitForTimeout,
   waitForSettledNode,
+  waitForSettledTrue,
   sleep,
 } from "@/lib/x-to-threads/wait-for";
 import { askMainWorldToInject } from "@/lib/cross-post/ask-main-to-inject";
@@ -13,6 +14,7 @@ import { askMainWorldToAttachImages } from "@/lib/cross-post/ask-main-to-attach"
 import {
   findPostButton,
   isComposerReadyToPost,
+  isPostButtonReady,
   composerHasExactText,
 } from "@/lib/x-to-threads/composer-ui";
 import {
@@ -28,7 +30,12 @@ import type { PendingImage } from "@/lib/cross-post/pending-images";
 const FILE_INPUT_WAIT_MS = 15_000;
 const COMPOSER_SETTLE_MS = 800;
 const COMPOSER_SETTLE_TIMEOUT_MS = 20_000;
-const PREVIEW_STICK_MS = 700;
+/** How long the preview must stay visible to count as “stuck” (not a flash). */
+const PREVIEW_SETTLE_MS = 500;
+/** Safety ceiling only — we return as soon as the DOM condition is met. */
+const PREVIEW_APPEAR_TIMEOUT_MS = 12_000;
+const PREVIEW_STICK_TIMEOUT_MS = 8_000;
+const READY_GATE_TIMEOUT_MS = 20_000;
 const ATTACH_ATTEMPTS = 3;
 
 function probeFilesForAccept(images: PendingImage[]): File[] {
@@ -171,25 +178,79 @@ async function attachUntilPreviewSticks(
       continue;
     }
 
-    await sleep(PREVIEW_STICK_MS);
+    // Wait for preview to APPEAR in the DOM (MutationObserver), not a fixed sleep.
+    const appeared = await waitForTimeout(
+      () => composerHasMediaPreview(composerSelector),
+      PREVIEW_APPEAR_TIMEOUT_MS,
+    );
+    if (!appeared) {
+      console.warn(
+        "[Yeet] No media preview appeared in DOM after attach — retrying.",
+      );
+      continue;
+    }
 
-    if (composerHasMediaPreview(composerSelector)) {
-      console.log("[Yeet] Media preview stuck — attach looked durable.");
+    // Wait until it STAYS (flash-then-wipe resets the settle timer).
+    const stuck = await waitForSettledTrue(
+      () => composerHasMediaPreview(composerSelector),
+      PREVIEW_SETTLE_MS,
+      PREVIEW_STICK_TIMEOUT_MS,
+    );
+
+    if (stuck) {
+      console.log("[Yeet] Media preview stuck in DOM — attach looked durable.");
       return lastInserted;
     }
 
     console.warn(
-      "[Yeet] Preview flashed then disappeared (composer remount?) — retrying attach.",
+      "[Yeet] Preview appeared then disappeared (composer remount?) — retrying attach.",
     );
   }
 
   return composerHasMediaPreview(composerSelector) ? lastInserted : 0;
 }
 
+type MediaReadyGate = {
+  previewOk: boolean;
+  postButtonFound: boolean;
+  postButtonReady: boolean;
+};
+
+function readMediaReadyGate(selectors: SelectorsConfig): MediaReadyGate {
+  const button = findPostButton(selectors);
+  return {
+    previewOk: composerHasMediaPreview(selectors.threads.composer),
+    postButtonFound: Boolean(button),
+    postButtonReady: isPostButtonReady(button),
+  };
+}
+
+/**
+ * Wait until preview is in the DOM AND Post is enabled.
+ * Driven by DOM mutations — timeout is only a safety ceiling.
+ */
+async function waitForMediaReadyGate(
+  selectors: SelectorsConfig,
+  timeoutMs: number,
+): Promise<MediaReadyGate> {
+  const ready = await waitForTimeout(() => {
+    const gate = readMediaReadyGate(selectors);
+    return gate.previewOk && gate.postButtonReady;
+  }, timeoutMs);
+
+  const gate = readMediaReadyGate(selectors);
+  console.log(
+    "[Yeet] Media ready gate:",
+    ready ? "met" : "timed out",
+    gate,
+  );
+  return gate;
+}
+
 /**
  * On Threads intent (`?yeet_auto_post` or storage handoff):
  * Text-only: inject → auto-click Post.
- * With images: inject → attach → user hits Post.
+ * With images: inject → attach → wait for preview+Post ready → auto-click Post.
  */
 export async function runThreadsAutoPost(
   selectors: SelectorsConfig,
@@ -261,15 +322,45 @@ export async function runThreadsAutoPost(
     }
 
     console.log(
-      `[Yeet] ${mediaInserted} image(s) attached — waiting for you to hit Post.`,
+      `[Yeet] ${mediaInserted} image(s) attached — waiting for Post enabled…`,
     );
-    await browser.storage.local.set({
-      yeetProgress: {
-        status: YeetProgressStatus.YEETING,
-        awaitingManualPost: true,
-      },
-    });
+
+    const readyGate = await waitForMediaReadyGate(
+      selectors,
+      READY_GATE_TIMEOUT_MS,
+    );
+
+    if (!readyGate.previewOk || !readyGate.postButtonReady) {
+      console.error(
+        "[Yeet] Media ready gate failed — leaving tab for manual Post.",
+        readyGate,
+      );
+      await browser.storage.local.set({
+        yeetProgress: {
+          status: YeetProgressStatus.YEETING,
+          awaitingManualPost: true,
+        },
+      });
+      listenForPostSuccess();
+      return;
+    }
+
+    const postButton = findPostButton(selectors);
+    if (!postButton) {
+      console.error("[Yeet] Post button missing at click time (media).");
+      await browser.storage.local.set({
+        yeetProgress: {
+          status: YeetProgressStatus.YEETING,
+          awaitingManualPost: true,
+        },
+      });
+      listenForPostSuccess();
+      return;
+    }
+
+    console.log("[Yeet] Media ready — auto-clicking Post.");
     listenForPostSuccess();
+    postButton.click();
     return;
   }
 
