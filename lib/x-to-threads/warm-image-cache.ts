@@ -1,12 +1,16 @@
 import {
   snapshotXComposerImageSrcs,
   filesFromImageSrcs,
+  xComposerHasUnsupportedMedia,
+  findXComposerMediaRoots,
 } from "@/lib/x-to-threads/capture-images";
 
 /**
  * X clears composer attachments the instant Post is pressed (often before
  * our click handler can fetch blob: URLs). Keep Files warm while the user
  * is still composing so yeet can attach them after Post.
+ *
+ * Only scans composer media roots — never the timeline (that yeeted random feed pics).
  */
 
 let cachedFiles: File[] = [];
@@ -18,9 +22,42 @@ function srcKey(srcs: string[]): string {
   return srcs.slice().sort().join("|");
 }
 
+function snapshotComposerSrcs(): string[] {
+  const roots = findXComposerMediaRoots();
+  if (roots.length === 0) return [];
+
+  const seen = new Set<string>();
+  const srcs: string[] = [];
+  for (const root of roots) {
+    if (xComposerHasUnsupportedMedia(root)) return [];
+    for (const src of snapshotXComposerImageSrcs(root)) {
+      if (seen.has(src)) continue;
+      seen.add(src);
+      srcs.push(src);
+    }
+  }
+  return srcs;
+}
+
+function composerHasUnsupportedMedia(): boolean {
+  return findXComposerMediaRoots().some((root) =>
+    xComposerHasUnsupportedMedia(root),
+  );
+}
+
 async function prefetchFromDocument(): Promise<void> {
   if (prefetching) return;
-  const srcs = snapshotXComposerImageSrcs(document);
+
+  if (composerHasUnsupportedMedia()) {
+    if (cachedFiles.length > 0) {
+      console.log("[Yeet] Warm image cache cleared (video/GIF in composer).");
+    }
+    cachedFiles = [];
+    cachedSrcKey = "";
+    return;
+  }
+
+  const srcs = snapshotComposerSrcs();
   const key = srcKey(srcs);
 
   if (srcs.length === 0) {
@@ -37,8 +74,7 @@ async function prefetchFromDocument(): Promise<void> {
   prefetching = true;
   try {
     const files = await filesFromImageSrcs(srcs);
-    // Only replace cache if DOM still matches what we fetched.
-    const still = srcKey(snapshotXComposerImageSrcs(document));
+    const still = srcKey(snapshotComposerSrcs());
     if (still === key && files.length > 0) {
       cachedFiles = files;
       cachedSrcKey = key;
@@ -76,7 +112,7 @@ export function startWarmImageCache(): void {
   document.addEventListener("change", schedulePrefetch, true);
 
   schedulePrefetch();
-  console.log("[Yeet] Warm image cache watching for attachments.");
+  console.log("[Yeet] Warm image cache watching for composer attachments.");
 }
 
 /** Copy of cached Files at Post time (blobs may already be revoked in the DOM). */
@@ -105,7 +141,6 @@ export async function awaitWarmCachedImages(timeoutMs = 1000): Promise<File[]> {
     if (!prefetching && cachedFiles.length > 0) {
       return takeWarmCachedImages();
     }
-    // Kick a fetch if DOM still has srcs.
     if (!prefetching) void prefetchFromDocument();
     await new Promise((r) => setTimeout(r, 50));
   }

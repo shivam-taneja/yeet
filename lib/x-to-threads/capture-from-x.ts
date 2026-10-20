@@ -9,6 +9,8 @@ import {
 import {
   snapshotXComposerImageSrcs,
   filesFromImageSrcs,
+  xComposerHasUnsupportedMedia,
+  findXComposerMediaRoots,
 } from "@/lib/x-to-threads/capture-images";
 import {
   awaitWarmCachedImages,
@@ -49,8 +51,20 @@ export async function captureFromX(
   }
 
   const text = extractTextFromDraftEditor(editorElement) || "";
-  const container = editorElement?.closest('[role="dialog"]') || document;
-  const liveSrcs = snapshotXComposerImageSrcs(container);
+  // Prefer compose dialog / media roots — never bare `document` (feed media).
+  const dialog = editorElement?.closest('[role="dialog"]') ?? null;
+  const mediaRoots = findXComposerMediaRoots();
+  const container: ParentNode =
+    dialog ||
+    mediaRoots.find((r) => editorElement && r.contains(editorElement)) ||
+    mediaRoots[0] ||
+    editorElement?.parentElement ||
+    document.body;
+  // Sync — composer media is cleared right after Post.
+  const hasUnsupportedMedia = xComposerHasUnsupportedMedia(container);
+  const liveSrcs = hasUnsupportedMedia
+    ? []
+    : snapshotXComposerImageSrcs(container);
 
   const storage = await browser.storage.local.get([
     "isActive",
@@ -67,6 +81,17 @@ export async function captureFromX(
 
   if (ctx === "unknown" || !xContexts[ctx]) {
     console.log(`[Yeet] Skipping — context "${ctx}" is not enabled.`);
+    return;
+  }
+
+  if (hasUnsupportedMedia) {
+    clearWarmImageCache();
+    console.warn(
+      "[Yeet] Skipping yeet — X composer has video/GIF (not supported yet).",
+    );
+    alert(
+      "Yeet skipped: videos and GIFs aren’t supported yet. Your post on X still went through.",
+    );
     return;
   }
 
