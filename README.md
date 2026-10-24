@@ -4,7 +4,11 @@ Yeet is a powerful browser extension that enables seamless, bidirectional cross-
 
 Website: [yeet.shivamtaneja.com](https://yeet.shivamtaneja.com/)
 Website Source Code: [shivam-taneja/yeet-web](https://github.com/shivam-taneja/yeet-web)
-Install: [Chrome Web Store](https://chromewebstore.google.com/detail/knbfidiiikhjebpijhafdikkjhbgbefe)
+
+Install:
+- [Chrome Web Store](https://chromewebstore.google.com/detail/knbfidiiikhjebpijhafdikkjhbgbefe)
+- [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/yeet/iaiackoabgikdcniiclhbflcnjfhnand)
+- [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/get-yeet/)
 
 ## Demo
 
